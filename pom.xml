@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.2.RELEASE</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.cm</groupId>
+    <artifactId>system-venuebooking</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>system-venuebooking</name>
+    <description>场馆预订系统</description>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <durid.version>1.0.31</durid.version>
+        <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
+        <spring-mybatis.version>1.3.2</spring-mybatis.version>
+        <spring-jdbc.version>5.1.4.RELEASE</spring-jdbc.version>
+        <mysql.version>5.1.47</mysql.version>
+        <freemarker.version>2.3.28</freemarker.version>
+        <druid.version>1.1.9</druid.version>
+        <cm-cloud.version>1.0.1-SNAPSHOT</cm-cloud.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-freemarker</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring-jdbc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>${spring-mybatis.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>${druid.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cm</groupId>
+            <artifactId>cloud-common-plugin-oauth</artifactId>
+            <version>${cm-cloud.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cm</groupId>
+            <artifactId>cloud-common-plugin-dynamic</artifactId>
+            <version>${cm-cloud.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.14</version>
+        </dependency>
+
+        <!--微信登录-->
+        <dependency>
+            <groupId>com.cm</groupId>
+            <artifactId>cloud-common-wechat</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!--新闻发布-->
+        <dependency>
+            <groupId>com.cm</groupId>
+            <artifactId>cloud-common-article</artifactId>
+            <version>${cm-cloud.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
