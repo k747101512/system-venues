@@ -1,0 +1,50 @@
+body .dialog-box {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 5px;
+}
+body .dialog-box-msg {
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+    color: #FFF;
+    min-width: 10px !important;
+}
+
+body .dialog-box .layui-layer-title {
+    height: 30px;
+    line-height: 30px;
+    background: #2e323e;
+    color: #fff;
+    border: none;
+    border-radius: 5px 5px 0 0;
+}
+
+body .dialog-box .layui-layer-btn {
+    border-top: 1px solid #E9E7E7
+}
+
+body .dialog-box .layui-layer-btn a {
+    background: #333;
+    color: #FFF;
+}
+
+body .dialog-box .layui-layer-btn .layui-layer-btn1 {
+    background: #999;
+    color: #FFF;
+}
+
+body .dialog-box .layui-layer-setwin {
+    top: 8px;
+}
+
+body .dialog-box .layui-layer-setwin .layui-layer-close1 {
+    background-position: -156px -38px;
+}
+
+body .dialog-box-msg .layui-layer-content {
+    padding: 10px 20px;
+}
+
+body .dialog-box-msg .layui-layer-padding {
+    padding: 20px 20px 20px 55px;
+    text-align: left;
+}

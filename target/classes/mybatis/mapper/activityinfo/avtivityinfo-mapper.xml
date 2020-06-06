@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cm.venuebooking.dao.activityinfo.IActivityInfoDao">
+
+    <resultMap id="activityInfoMap" type="com.cm.venuebooking.pojo.dtos.activityinfo.ActivityInfoDTO">
+        <id column="activity_id" property="activityId"/>
+        <result column="project_category" property="projectCategory"/>
+        <result column="front_cover" property="frontCover"/>
+        <result column="title" property="title"/>
+        <result column="activity_abstract" property="activityAbstract"/>
+        <result column="sign_time_str" property="signTimeStr"/>
+        <result column="sign_time_end" property="signTimeEnd"/>
+        <result column="activity_time_str" property="activityTimeStr"/>
+        <result column="activity_time_end" property="activityTimeEnd"/>
+        <result column="activity_place" property="activityPlace"/>
+        <result column="activity_cost" property="activityCost"/>
+        <result column="organizer" property="organizer"/>
+        <result column="activity_summary" property="activitySummary"/>
+        <result column="sign_attention" property="signAttention"/>
+        <result column="other_tips" property="otherTips"/>
+        <result column="publish_type" property="publishType"/>
+    </resultMap>
+
+    <resultMap id="activityInfoListMap" type="com.cm.venuebooking.pojo.dtos.activityinfo.ActivityInfoListDTO">
+        <id column="activity_id" property="activityId"/>
+        <result column="front_cover" property="frontCover"/>
+        <result column="title" property="title"/>
+        <result column="activity_place" property="activityPlace"/>
+        <result column="activity_abstract" property="activityAbstract"/>
+        <result column="activity_time_str" property="activityTimeStr"/>
+        <result column="activity_time_end" property="activityTimeEnd"/>
+    </resultMap>
+
+    <!-- 新增赛事信息 -->
+    <insert id="saveActivityInfo" parameterType="map">
+        INSERT INTO gen_activity_info (
+            activity_id, project_category, front_cover, title, activity_abstract, organizer, activity_summary,
+            publish_type, creator, gmt_create, modifier, gmt_modified, is_delete
+        ) VALUES(
+            #{activityId}, #{projectCategory}, #{frontCover}, #{title}, #{activityAbstract},#{organizer},#{activitySummary},
+            '1', #{creator},#{gmtCreate}, #{modifier}, #{gmtMmodified}, #{isDelete}
+        )
+    </insert>
+
+    <select id="getActivityInfoDetail" parameterType="map" resultMap="activityInfoMap">
+        SELECT
+            t1.activity_id,
+            t2.dictionary_name project_category,
+            t1.front_cover,
+            t1.title,
+            t1.activity_abstract,
+            t1.sign_time_str,
+            t1.sign_time_end,
+            t1.activity_time_str,
+            t1.activity_time_end,
+            t1.activity_place,
+            t1.activity_cost,
+            t1.organizer,
+            t1.activity_summary,
+            t1.sign_attention,
+            t1.other_tips,
+            t1.publish_type
+        FROM
+            gen_activity_info t1
+        LEFT JOIN data_dictionary t2 ON t1.project_category = t2.dictionary_id
+        WHERE
+            t1.is_delete = 0
+        AND t1.publish_type = 1
+        AND t1.activity_id = #{activityId}
+    </select>
+
+    <select id="listPageActivityInfo" parameterType="map" resultMap="activityInfoMap">
+        SELECT
+            t1.activity_id,
+            t2.dictionary_name project_category,
+            t1.front_cover,
+            t1.title,
+            t1.activity_abstract,
+            t1.sign_time_str,
+            t1.sign_time_end,
+            t1.activity_time_str,
+            t1.activity_time_end,
+            t1.activity_place,
+            t1.activity_cost,
+            t1.organizer,
+            t1.activity_summary,
+            t1.sign_attention,
+            t1.other_tips,
+            t1.publish_type
+        FROM
+            gen_activity_info t1
+        LEFT JOIN data_dictionary t2 ON t1.project_category = t2.dictionary_id
+        WHERE
+            t1.is_delete = 0
+        AND t1.publish_type = 1
+    </select>
+
+    <select id="listActivityListInfo" parameterType="map" resultMap="activityInfoListMap">
+        SELECT
+            t1.activity_id,
+            t1.front_cover,
+            t1.title,
+            t1.activity_place,
+            t1.activity_abstract,
+            t1.activity_time_str,
+            t1.activity_time_end
+        FROM
+            gen_activity_info t1
+                LEFT JOIN data_dictionary t2 ON t1.project_category = t2.dictionary_id
+        WHERE
+            t1.is_delete = 0
+          AND t1.publish_type = 1
+    </select>
+
+</mapper>

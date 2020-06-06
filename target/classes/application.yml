@@ -1,0 +1,137 @@
+server:
+  port: 8082
+  url: http://192.168.0.109:8082/venuebooking
+  #url: http://192.168.159.1:8082/venuebooking
+  title: 包头市全民健康智慧平台
+  servlet:
+    context-path: /venuebooking
+
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML5
+    encoding: UTF-8
+    cache: false
+  main:
+    allow-bean-definition-overriding: true
+  servlet:
+    multipart:
+      max-file-size: 1GB
+      max-request-size: 1GB
+  datasource:
+    druid:
+      url: jdbc:mysql://127.0.0.1:3306/db_cloud_venuebooking?useUnicode=true&characterEncoding=utf8&characterSetResults=utf8&autoReconnect=true&failOverReadOnly=false&useSSL=false
+      db-type: mysql
+      driver-class-name: com.mysql.jdbc.Driver
+      username: root
+      password: 123456
+      initial-size: 2
+      min-idle: 2
+      max-active: 5
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 10
+      filter:
+        commons-log:
+          connection-logger-name: stat,wall,log4j
+        stat:
+          log-slow-sql: true
+          slow-sql-millis: 2000
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      use-global-data-source-stat: true
+
+# 数据库
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations: classpath*:mybatis/mapper/**/*.xml
+
+# 文档
+swagger:
+  title: 接口文档
+  description: 场馆预订系统接口文档
+  service-url: https://baidu.com/
+  version: 1.0
+  swagger-base-package: com.cm
+
+# 文件
+file:
+  uploadPath: D:\\ideaWorkspace\\uploadfiles\\venuebooking\\filetest
+  imageTypes: png,jpg,jpeg,gif,blob
+  videoTypes: mp4,rmvb
+  audioTypes: mp3,wmv
+  fileTypes: doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar,apk,pdf
+  maxFileCount: 6
+
+# 安全
+security:
+  oauth2:
+    oauth-server: http://39.104.124.118:7001/usercenter
+    #oauth-server: https://www.wgink.ink/usercenter
+    oauth-logout: ${security.oauth2.oauth-server}/logout?redirect_uri=${server.url}
+    client:
+      #client-id: 98d88b518a8946798134218c7c95ccf2
+      client-id: c49ddbe469864d9f96c51669626d9ed5
+      #client-secret: UWJBQTVJa3o0bng0N3hPeEF0ZjV5dmZGMFFSSnZRVklWaFRRQVFlYkYra21ac2wwZTJHWk5NbXh3L3h3U2c4Rg==
+      client-secret: aktQODFqcjd6MVQ3ODRtVVcrQUt6REpDWmMwQytaRnUrQVpUYytSK2dzWW1ac2wwZTJHWk5NbXh3L3h3U2c4Rg==
+      user-authorization-uri: ${security.oauth2.oauth-server}/oauth/authorize
+      access-token-uri: ${security.oauth2.oauth-server}/oauth/token
+      grant-type: authorization_code
+    resource:
+      jwt:
+        key-uri: ${security.oauth2.oauth-server}/oauth/token_key
+      token-info-uri: ${security.oauth2.oauth-server}/oauth/check_token
+      user-info-uri: ${security.oauth2.oauth-server}/user
+    authorization:
+      check-token-access: ${security.oauth2.oauth-server}/oauth/token_key
+
+api-path:
+  user-center: ${security.oauth2.oauth-server}
+
+# 访问控制
+access-control:
+  pass-paths:
+    - /index.html
+    - /logout.html
+    - /default.html
+    - /assets/**
+    - /route/file/downloadfile/**
+    - /route/publishresource/**
+  save-paths:
+    - /**/save*/**
+    - /**/add*/**
+  delete-paths:
+    - /**/delete*/**
+    - /**/remove*/**
+  update-paths:
+    - /**/update*/**
+    - /**/edit*/**
+  query-paths:
+    - /**/get*/**
+    - /**/query*/**
+    - /**/find*/**
+    - /**/list*/**
+    - /**/count*/**
+
+# 日志
+logging:
+  level:
+    root: error
+    com.cm: debug
+
+open-platform:
+  wechat:
+    mini-app:
+      active: true
+      authorizeUrl: https://api.weixin.qq.com/sns/jscode2session
+      bindUserUrl: http://39.104.124.118:7001/usercenter/wxminiapp/sign/login
+      #bindUserUrl: https://www.wgink.ink/usercenter/wxminiapp/sign/login
+      grantType: authorization_code
+      appKey: wx57052635beaab3fa
+      appSecret: 4cc3e86da0f1b2855dc99c83f9c451b9

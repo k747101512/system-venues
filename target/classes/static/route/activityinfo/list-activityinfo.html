@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <base href="/venuebooking/">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="assets/fonts/font-awesome/css/font-awesome.css"/>
+    <link rel="stylesheet" href="assets/layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="assets/layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+<div class="layui-fluid layui-anim layui-anim-fadein">
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="test-table-reload-btn" style="margin-bottom: 10px;">
+                        <div class="layui-inline">
+                            <input type="text" id="keywords" class="layui-input search-item" autocomplete="off" placeholder="输入关键字">
+                        </div>
+                        <button type="button" id="search" class="layui-btn layui-btn-sm">
+                            <i class="fa fa-lg fa-search"></i> 搜索
+                        </button>
+                    </div>
+                    <table class="layui-hide" id="dataTable" lay-filter="dataTable"></table>
+                    <!-- 表头按钮组 -->
+                    <script type="text/html" id="headerToolBar">
+                        <div class="layui-btn-group">
+                            <button type="button" class="layui-btn layui-btn-sm" lay-event="saveEvent">
+                                <i class="fa fa-lg fa-plus"></i> 新增
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-normal layui-btn-sm" lay-event="updateEvent">
+                                <i class="fa fa-lg fa-edit"></i> 编辑
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-danger layui-btn-sm" lay-event="removeEvent">
+                                <i class="fa fa-lg fa-trash"></i> 删除
+                            </button>
+                        </div>
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="assets/layuiadmin/layui/layui.js"></script>
+<script src="assets/js/vendor/viewer/viewer.min.js"></script>
+<script>
+    layui.config({
+        base: 'assets/layuiadmin/'
+    }).extend({
+        index: 'lib/index'
+    }).use(['index', 'table'], function() {
+        var $ = layui.$;
+        var $win = $(window);
+        var table = layui.table;
+        var admin = layui.admin;
+        var resizeTimeout = null;
+        var tableUrl = 'api/activityinfo/listpageactivityinfo';
+
+        // 初始化表格
+        function initTable() {
+            table.render({
+                elem: '#dataTable',
+                id: 'dataTable',
+                url: top.restAjax.path(tableUrl, []),
+                width: admin.screen() > 1 ? '100%' : '',
+                height: $win.height() - 150,
+                limit: 20,
+                limits: [20, 40, 60, 80, 100, 200],
+                toolbar: '#headerToolBar',
+                request: {
+                    pageName: 'page',
+                    limitName: 'rows'
+                },
+                cols: [[
+                    {type:'checkbox', fixed: 'left'},
+                    {field:'rowNum', width:80, title: '序号', fixed: 'left', align:'center', templet: '<span>{{d.LAY_INDEX}}</span>'},
+                    {field: 'title', width: 300, title: '标题', align:'center',
+                        templet: function(row) {
+                            var rowData = row[this.field];
+                            if(typeof(rowData) === 'undefined' || rowData == null || rowData === '') {
+                                return '-';
+                            }
+                            return rowData;
+                        }
+                    },
+                    {width: 300, title: '报名时间', align:'center',
+                        templet: function(row) {
+                            var signTimeStr = row['signTimeStr'].substring(0,10);
+                            var signTimeEnd = row['signTimeEnd'].substring(0,10);
+                            return signTimeStr + ' ~ ' + signTimeEnd;
+                        }
+                    },
+                    {width: 300, title: '活动时间', align:'center',
+                        templet: function(row) {
+                            var activityTimeStr = row['activityTimeStr'].substring(0,10);
+                            var activityTimeStr = row['activityTimeStr'].substring(0,10);
+                            return activityTimeStr + ' ~ ' + activityTimeStr;
+                        }
+                    },
+                    {field :'activityPlace', width: 300, title: '活动地点', align:'center',
+                        templet: function(row) {
+                            var rowData = row[this.field];
+                            if(typeof(rowData) === 'undefined' || rowData == null || rowData === '') {
+                                return '-';
+                            }
+                            return rowData;
+                        }
+                    },
+                    {field :'organizer', width: 300, title: '主办方', align:'center',
+                        templet: function(row) {
+                            var rowData = row[this.field];
+                            if(typeof(rowData) === 'undefined' || rowData == null || rowData === '') {
+                                return '-';
+                            }
+                            return rowData;
+                        }
+                    },
+                ]],
+                page: true,
+                parseData: function(data) {
+                    return {
+                        'code': 0,
+                        'msg': '',
+                        'count': data.total,
+                        'data': data.rows
+                    };
+                }
+            });
+        }
+        initTable();
+
+        // 事件 - 搜索按钮
+        $(document).on('click', '#search', function() {
+            reloadTable(1);
+        });
+
+        // 事件 - 页面变化
+        $win.on('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                reloadTable();
+            }, 500);
+        });
+
+        // 事件 - 增删改
+        table.on('toolbar(dataTable)', function(obj) {
+            var layEvent = obj.event;
+            var checkStatus = table.checkStatus('dataTable');
+            var checkDatas = checkStatus.data;
+            if(layEvent === 'saveEvent') {
+                layer.open({
+                    type: 2,
+                    title: false,
+                    closeBtn: 0,
+                    area: ['100%', '100%'],
+                    shadeClose: true,
+                    anim: 2,
+                    content: top.restAjax.path('route/activityinfo/save-activityinfo.html', []),
+                    end: function() {
+                        reloadTable();
+                    }
+                });
+            } else if(layEvent === 'updateEvent') {
+                if(checkDatas.length === 0) {
+                    top.dialog.msg(top.dataMessage.table.selectEdit);
+                } else if(checkDatas.length > 1) {
+                    top.dialog.msg(top.dataMessage.table.selectOneEdit);
+                } else {
+                    layer.open({
+                        type: 2,
+                        title: false,
+                        closeBtn: 0,
+                        area: ['60%', '40%'],
+                        shadeClose: true,
+                        anim: 2,
+                        content: top.restAjax.path('route/venuesproject/update-groundconfig.html?groundInfoId={groundInfoId}', [checkDatas[0].groundInfoId]),
+                        end: function() {
+                            reloadTable();
+                        }
+                    });
+                }
+            } else if(layEvent === 'removeEvent') {
+                if(checkDatas.length === 0) {
+                    top.dialog.msg(top.dataMessage.table.selectDelete);
+                } else {
+                    var ids = '';
+                    for(var i = 0, item; item = checkDatas[i++];) {
+                        if(i > 1) {
+                            ids += '_';
+                        }
+                        ids += item['groundInfoId'];
+                    }
+                    removeData(ids);
+                }
+            }
+        });
+
+        //列表按钮绑定
+        table.on('tool(dataTable)',function(obj) {
+            if(obj.event === 'arrive'){
+                layer.msg('已确认到场');
+                return;
+            }
+            if(obj.event === 'consult'){
+                layer.msg('已确认协商');
+                return;
+            }
+            if(obj.event === 'blackList'){
+                layer.msg('已拉入黑名单');
+                return;
+            }
+        });
+
+        // 删除
+        function removeData(ids) {
+            top.dialog.msg(top.dataMessage.delete, {
+                time: 0,
+                btn: [top.dataMessage.button.yes, top.dataMessage.button.no],
+                shade: 0.3,
+                yes: function (index) {
+                    top.dialog.close(index);
+                    var layIndex;
+                    top.restAjax.delete(top.restAjax.path('api/groundconfig/removegroundinfo/{ids}', [ids]), {}, null, function (code, data) {
+                        top.dialog.msg(top.dataMessage.deleteSuccess, {time: 1000});
+                        reloadTable();
+                    }, function (code, data) {
+                        top.dialog.msg(data.msg);
+                    }, function () {
+                        layIndex = top.dialog.msg(top.dataMessage.deleting, {icon: 16, time: 0, shade: 0.3});
+                    }, function () {
+                        top.dialog.close(layIndex);
+                    });
+                }
+            });
+        }
+
+        // 重载表格
+        function reloadTable(currentPage) {
+            table.reload('dataTable', {
+                url: top.restAjax.path(tableUrl, []),
+                where: {
+                    keywords: $('#keywords').val(),
+                    venuesProjectId: venuesProjectId,
+                    endTime: $('#endTime').val()
+                },
+                page: {
+                    curr: currentPage
+                },
+                height: $win.height() - 150,
+            });
+        }
+    });
+</script>
+</body>
+</html>

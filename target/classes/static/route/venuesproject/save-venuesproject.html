@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <base href="/venuebooking/">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="assets/fonts/font-awesome/css/font-awesome.css"/>
+    <link rel="stylesheet" href="assets/layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="assets/layuiadmin/style/admin.css" media="all">
+</head>
+<body>
+<div class="layui-fluid layui-anim layui-anim-fadein">
+    <div class="layui-card">
+        <div class="layui-card-header">
+            <span class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+              <a class="close" href="javascript:void(0);">上级列表</a><span lay-separator="">/</span>
+              <a href="javascript:void(0);"><cite>新增内容</cite></a>
+            </span>
+        </div>
+        <div class="layui-card-body" style="padding: 15px;">
+            <form class="layui-form layui-form-pane" lay-filter="dataForm">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">所属场馆</label>
+                    <div class="layui-input-block layui-form" id="venueSelectTemplateBox" lay-filter="venueSelectTemplateBox"></div>
+                    <script id="venueSelectTemplate" type="text/html">
+                        <select id="venueId" name="venueId" lay-verify="required">
+                            <option value="">请选择</option>
+                            {{# for(var i = 0, item; item = d[i++];) { }}
+                            <option value="{{item.venuesInfoId}}">{{item.venueName}}</option>
+                            {{# } }}
+                        </select>
+                    </script>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">项目类别</label>
+                    <div class="layui-input-block layui-form" id="projectSelectTemplateBox" lay-filter="projectSelectTemplateBox"></div>
+                    <script id="projectSelectTemplate" type="text/html">
+                        <select id="projectCategory" name="projectCategory" lay-verify="required">
+                            <option value="">请选择</option>
+                            {{# for(var i = 0, item; item = d[i++];) { }}
+                            <option value="{{item.dictionaryId}}">{{item.dictionaryName}}</option>
+                            {{# } }}
+                        </select>
+                    </script>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">项目描述</label>
+                    <div class="layui-input-block">
+                        <textarea id="projectDescription" name="projectDescription" class="layui-textarea" placeholder="请输入项目描述"></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item" pane>
+                    <label class="layui-form-label">场地设施</label>
+                    <div class="layui-input-block layui-form" id="facilitiesCheckboxTemplateBox" lay-filter="facilitiesCheckboxTemplateBox"></div>
+                    <script id="facilitiesCheckboxTemplate" type="text/html">
+                        {{# for(var i = 0, item; item = d[i++];) { }}
+                        <input type="checkbox" name="facilities[{{item.dictionaryId}}]" value="{{item.dictionaryId}}" title="{{item.dictionaryName}}">
+                        {{# } }}
+                    </script>
+                </div>
+                <div class="layui-form-item layui-layout-admin">
+                    <div class="layui-input-block">
+                        <div class="layui-footer" style="left: 0;">
+                            <button type="button" class="layui-btn" lay-submit lay-filter="submitForm">提交新增</button>
+                            <button type="button" class="layui-btn layui-btn-primary close">返回上级</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="assets/layuiadmin/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: 'assets/layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'form', 'laytpl'], function(){
+        var $ = layui.$;
+        var form = layui.form;
+        var laytpl = layui.laytpl;
+
+        // 初始化场馆列表
+        function initVenuesInfoSelect() {
+            top.restAjax.get(top.restAjax.path('api/venuesinfo/listvenuesinfo', []), {}, null, function(code, data, args) {
+                laytpl(document.getElementById('venueSelectTemplate').innerHTML).render(data, function(html) {
+                    document.getElementById('venueSelectTemplateBox').innerHTML = html;
+                });
+                form.render('select', 'venueSelectTemplateBox');
+            }, function(code, data) {
+                top.dialog.msg(data.msg);
+            });
+        }
+        initVenuesInfoSelect();
+
+        // 初始化项目分类
+        function initProjectSelect() {
+            top.restAjax.get(top.restAjax.path('api/datadictionary/listdictionarybyparentid/f59ebf77-c2b7-49bc-8f58-2928bd2b450d', []), {}, null, function(code, data, args) {
+                laytpl(document.getElementById('projectSelectTemplate').innerHTML).render(data, function(html) {
+                    document.getElementById('projectSelectTemplateBox').innerHTML = html;
+                });
+                form.render('select', 'projectSelectTemplateBox');
+            }, function(code, data) {
+                top.dialog.msg(data.msg);
+            });
+        }
+        initProjectSelect();
+
+        // 初始化场地设施
+        function initFacilitiesCheckbox() {
+            top.restAjax.get(top.restAjax.path('api/datadictionary/listdictionarybyparentid/97361873-a331-45e8-8adf-1d8615e9f2b1', []), {}, null, function(code, data, args) {
+                laytpl(document.getElementById('facilitiesCheckboxTemplate').innerHTML).render(data, function(html) {
+                    document.getElementById('facilitiesCheckboxTemplateBox').innerHTML = html;
+                });
+                form.render('checkbox', 'facilitiesCheckboxTemplateBox');
+            }, function(code, data) {
+                top.dialog.msg(data.msg);
+            });
+        }
+        initFacilitiesCheckbox();
+
+
+        function closeBox() {
+            parent.layer.close(parent.layer.getFrameIndex(window.name));
+        }
+
+        function refreshDownloadTemplet(fileName, file) {
+            var dataRander = {};
+            dataRander[fileName] = file;
+
+            laytpl(document.getElementById(fileName +'FileDownload').innerHTML).render(dataRander, function(html) {
+                document.getElementById(fileName +'FileBox').innerHTML = html;
+            });
+        }
+
+        // 初始化文件列表
+        function initFileList(fileName, ids, callback) {
+            var dataForm = {};
+            dataForm[fileName] = ids;
+            form.val('dataForm', dataForm);
+
+            if(!ids) {
+                refreshDownloadTemplet(fileName, []);
+                if(callback) {
+                    callback(fileName, []);
+                }
+                return;
+            }
+
+            top.restAjax.get(top.restAjax.path('api/file/listfilebyfileid', []), {
+                ids: ids
+            }, null, function(code, data) {
+                refreshDownloadTemplet(fileName, data);
+                if(callback) {
+                    callback(fileName, data);
+                }
+            }, function(code, data) {
+                top.dialog.msg(data.msg);
+            });
+        }
+
+        // 初始化视频
+        function initVideo(fileName, data) {
+            for(var i = 0, item; item = data[i++];) {
+                var player = new ckplayer({
+                    container: '#'+ fileName + i,
+                    variable: 'player',
+                    flashplayer: false,
+                    video: {
+                        file: 'route/file/downloadfile/true/'+ item.fileId,
+                        type: 'video/mp4'
+                    }
+                });
+            }
+        }
+
+
+        // 初始化内容
+        function initData() {
+            top.restAjax.get(top.restAjax.path('api/venuesproject/getcurrentuseridinfo', []), {}, null, function(code, data) {
+            }, function(code, data) {
+                top.dialog.msg(data.msg);
+            }, function() {
+                loadLayerIndex = top.dialog.msg(top.dataMessage.loading, {icon: 16, time: 0, shade: 0.3});
+            }, function() {
+                top.dialog.close(loadLayerIndex);
+            });
+        }
+        initData();
+
+        // 提交表单
+        form.on('submit(submitForm)', function(formData) {
+            top.dialog.confirm(top.dataMessage.commit, function(index) {
+                top.dialog.close(index);
+                var loadLayerIndex;
+                formData.field['facilities'] = top.restAjax.checkBoxToString(formData.field, 'facilities');
+                top.restAjax.post(top.restAjax.path('api/venuesproject/savevenuesproject', []), formData.field, null, function(code, data) {
+                    var layerIndex = top.dialog.msg(top.dataMessage.commitSuccess, {
+                        time: 0,
+                        btn: [top.dataMessage.button.yes, top.dataMessage.button.no],
+                        shade: 0.3,
+                        yes: function(index) {
+                            top.dialog.close(index);
+                            window.location.reload();
+                        },
+                        btn2: function() {
+                            closeBox();
+                        }
+                    });
+                }, function(code, data) {
+                    top.dialog.msg(data.msg);
+                }, function() {
+                    loadLayerIndex = top.dialog.msg(top.dataMessage.committing, {icon: 16, time: 0, shade: 0.3});
+                }, function() {
+                    top.dialog.close(loadLayerIndex);
+                });
+            });
+            return false;
+        });
+
+        $('.close').on('click', function() {
+            closeBox();
+        });
+
+        // 校验
+        form.verify({
+        });
+    });
+</script>
+</body>
+</html>

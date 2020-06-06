@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cm.venuebooking.dao.venuesproject.IVenuesProjectDao">
+
+    <resultMap id="venuesProjectDTO" type="com.cm.venuebooking.pojo.dtos.venuesproject.VenuesProjectDTO">
+        <id column="venues_project_id" property="venuesProjectId"/>
+        <result column="venue_id" property="venueId"/>
+        <result column="project_category" property="projectCategory"/>
+        <result column="business_hours" property="businessHours"/>
+        <result column="project_description" property="projectDescription"/>
+        <result column="facilities" property="facilities"/>
+    </resultMap>
+    
+    <resultMap id="venuesProjectForListDTO" type="com.cm.venuebooking.pojo.dtos.venuesproject.VenuesProjectForListDTO">
+        <id column="venues_project_id" property="venuesProjectId"/>
+        <result column="venue_id" property="venueId"/>
+        <result column="venue_name" property="venueName"/>
+        <result column="project_category" property="projectCategory"/>
+        <result column="business_hours" property="businessHours"/>
+        <result column="project_description" property="projectDescription"/>
+        <result column="facilities" property="facilities"/>
+    </resultMap>
+
+    <!-- 新增场馆项目表 -->
+    <insert id="saveVenuesProject" parameterType="map">
+        INSERT INTO gen_venues_project(
+            venues_project_id,
+            venue_id,
+            project_category,
+            business_hours,
+            project_description,
+            facilities,
+            creator,
+            gmt_create,
+            modifier,
+            gmt_modified,
+            is_delete
+        ) VALUES(
+            #{venuesProjectId},
+            #{venueId},
+            #{projectCategory},
+            #{businessHours},
+            #{projectDescription},
+            #{facilities},
+            #{creator},
+            #{gmtCreate},
+            #{modifier},
+            #{gmtModified},
+            #{isDelete}
+        )
+    </insert>
+
+    <!-- 删除场馆项目表 -->
+    <update id="removeVenuesProject" parameterType="map">
+        UPDATE
+            gen_venues_project
+        SET
+            is_delete = 1,
+            modifier = #{modifier},
+            gmt_modified = #{gmtModified}
+        WHERE
+            venues_project_id IN
+        <foreach collection="venuesProjectIds" index="index" open="(" separator="," close=")">
+            #{venuesProjectIds[${index}]}
+        </foreach>
+    </update>
+
+    <!-- 修改场馆项目表 -->
+    <update id="updateVenuesProject" parameterType="map">
+        UPDATE
+            gen_venues_project
+        SET
+        <if test="venueId != null and venueId != ''">
+            venue_id = #{venueId},
+        </if>
+        <if test="projectCategory != null and projectCategory != ''">
+            project_category = #{projectCategory},
+        </if>
+        <if test="businessHours != null and businessHours != ''">
+            business_hours = #{businessHours},
+        </if>
+        <if test="projectDescription != null and projectDescription != ''">
+            project_description = #{projectDescription},
+        </if>
+        <if test="facilities != null and facilities != ''">
+            facilities = #{facilities},
+        </if>
+            modifier = #{modifier},
+            gmt_modified = #{gmtModified}
+        WHERE
+            venues_project_id = #{venuesProjectId}
+    </update>
+
+    <!-- 场馆项目表详情 -->
+    <select id="getVenuesProject" parameterType="map" resultMap="venuesProjectDTO">
+        SELECT
+            t1.venue_id,
+            t1.project_category,
+            t1.business_hours,
+            t1.project_description,
+            t1.facilities,
+            t1.venues_project_id
+        FROM
+            gen_venues_project t1
+        WHERE
+            t1.is_delete = 0
+        <if test="venuesProjectId != null and venuesProjectId != ''">
+        AND
+            t1.venues_project_id = #{venuesProjectId}
+        </if>
+    </select>
+
+    <!-- 场馆项目表列表 -->
+    <select id="listVenuesProject" parameterType="map" resultMap="venuesProjectDTO">
+        SELECT
+            t1.venue_id,
+            t1.project_category,
+            t1.business_hours,
+            t1.project_description,
+            t1.facilities,
+            t1.venues_project_id
+        FROM
+            gen_venues_project t1
+        WHERE
+            t1.is_delete = 0
+        <if test="keywords != null and keywords != ''">
+            <!-- 这里添加检索关键字 -->
+        </if>
+        <if test="data_authority != null and data_authority != ''">
+            <if test="data_authority == 'self' ">
+                AND t1.creator = #{creator}
+            </if>
+            <if test="data_authority != 'self'">
+                AND t1.creator IN
+                <foreach collection="data_creators" open="(" close=")" separator="," index="index">
+                    #{data_creators[${index}]}
+                </foreach>
+            </if>
+        </if>
+        <if test="venuesInfoId != null and venuesInfoId != ''">
+            AND venue_id = #{venuesInfoId}
+        </if>
+        <if test="venuesProjectIds != null and venuesProjectIds.size > 0">
+        AND
+            t1.venues_project_id IN
+            <foreach collection="venuesProjectIds" index="index" open="(" separator="," close=")">
+            #{venuesProjectIds[${index}]}
+            </foreach>
+        </if>
+        GROUP BY
+            t1.project_category,
+            t1.business_hours,
+            t1.project_description,
+            t1.facilities,
+            t1.venues_project_id
+    </select>
+    
+    <select id="listVenuesProjectLocal" parameterType="map" resultMap="venuesProjectForListDTO">
+        SELECT
+            t1.venue_id,
+            t1.project_category,
+            t1.business_hours,
+            t1.project_description,
+            t1.facilities,
+            t1.venues_project_id,
+            t2.venue_name,
+            t3.dictionary_name projectCategoryName,
+            GROUP_CONCAT(t4.dictionary_name) facilitiesNames
+        FROM
+          gen_venues_project t1
+        LEFT JOIN gen_venues_info t2 ON t2.venues_info_id = t1.venue_id
+        LEFT JOIN data_dictionary t3 ON t3.dictionary_id = t1.project_category
+        LEFT JOIN data_dictionary t4 ON FIND_IN_SET(t4.dictionary_id,t1.facilities)
+        WHERE
+            t1.is_delete = 0
+        AND t1.creator = #{creator}
+            <if test="keywords != null and keywords != ''">
+                <!-- 这里添加检索关键字 -->
+            </if>
+        GROUP BY
+            t1.venue_id,
+            t1.project_category,
+            t1.business_hours,
+            t1.project_description,
+            t1.facilities,
+            t1.venues_project_id
+    </select>
+
+    <select id="listVenuesProjectWeChatProgram" parameterType="map" resultType="map">
+        SELECT
+            dictionary_id categoryId,
+            dictionary_name categoryName
+        FROM
+            data_dictionary
+        WHERE
+            dictionary_parent_id = #{id}
+        ORDER BY
+            dictionary_sort DESC
+    </select>
+
+    <!-- 小程序查询场馆项目详情-->
+    <select id="getVenuesProjectDetailById" parameterType="map" resultMap="venuesProjectDTO">
+        SELECT
+            t1.venues_project_id,
+            t1.venue_id,
+            t1.project_category,
+            t1.business_hours,
+            t1.project_description,
+            GROUP_CONCAT(t2.dictionary_name) facilities
+        FROM
+            gen_venues_project t1
+                LEFT JOIN data_dictionary t2 ON FIND_IN_SET(t2.dictionary_id,t1.facilities)
+        WHERE
+            t1.is_delete = 0
+        AND t1.venues_project_id = #{venuesProjectId}
+        GROUP BY
+            t1.venues_project_id,
+            t1.venue_id,
+            t1.project_category,
+            t1.business_hours,
+            t1.project_description
+    </select>
+
+    <select id="listVenuesProjectForWeChatProgram" parameterType="map" resultType="map">
+        SELECT
+            t1.venues_project_id,
+            t1.project_category,
+            t2.dictionary_name project_category
+        FROM
+            gen_venues_project t1
+        LEFT JOIN data_dictionary t2 ON t1.project_category = t2.dictionary_id
+        WHERE
+            t1.is_delete = 0
+        <if test="venuesInfoId != null and venuesInfoId != ''">
+            AND venue_id = #{venuesInfoId}
+        </if>
+    </select>
+
+    <select id="listVenueProjectMiniApp" parameterType="map" resultMap="venuesProjectDTO">
+        SELECT
+            t1.venues_project_id,
+            t2.dictionary_name project_category,
+            t1.project_description,
+            GROUP_CONCAT(t3.dictionary_name) facilities
+        FROM
+            gen_venues_project t1
+        LEFT JOIN data_dictionary t2 ON t1.project_category = t2.dictionary_id
+        LEFT JOIN data_dictionary t3 ON FIND_IN_SET(t3.dictionary_id,t1.facilities)
+        WHERE
+            t1.is_delete = 0
+        AND venue_id = #{venuesInfoId}
+        GROUP BY
+            t1.venues_project_id
+    </select>
+
+</mapper>

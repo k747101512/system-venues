@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cm.venuebooking.dao.venuesinfo.IVenuesInfoDao">
+
+    <resultMap id="venuesInfoDTO" type="com.cm.venuebooking.pojo.dtos.venuesinfo.VenuesInfoDTO">
+        <id column="venues_info_id" property="venuesInfoId"/>
+        <result column="venue_city" property="venueCity"/>
+        <result column="venue_other_service" property="venueOtherService"/>
+        <result column="venue_charge" property="venueCharge"/>
+        <result column="venue_route" property="venueRoute"/>
+        <result column="venue_area" property="venueArea"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="venue_telephone" property="venueTelephone"/>
+        <result column="venue_name" property="venueName"/>
+        <result column="venue_position" property="venuePosition"/>
+        <result column="venue_description" property="venueDescription"/>
+        <result column="venue_open_type" property="venueOpenType"/>
+        <result column="business_hours" property="businessHours"/>
+        <result column="venue_plan" property="venuePlan"/>
+        <result column="venue_panorama" property="venuePanorama"/>
+        <result column="booking_tips" property="bookingTips"/>
+        <result column="venue_service" property="venueService"/>
+    </resultMap>
+
+    <!-- 新增场馆信息表 -->
+    <insert id="saveVenuesInfo" parameterType="map">
+        INSERT INTO gen_venues_info(
+            venues_info_id,
+            venue_city,
+            venue_other_service,
+            venue_charge,
+            venue_route,
+            venue_area,
+            longitude,
+            latitude,
+            venue_telephone,
+            venue_name,
+            venue_position,
+            venue_description,
+            venue_open_type,
+            business_hours,
+            venue_plan,
+            venue_panorama,
+            booking_tips,
+            venue_service,
+            creator,
+            gmt_create,
+            modifier,
+            gmt_modified,
+            is_delete
+        ) VALUES(
+            #{venuesInfoId},
+            #{venueCity},
+            #{venueOtherService},
+            #{venueCharge},
+            #{venueRoute},
+            #{venueArea},
+            #{longitude},
+            #{latitude},
+            #{venueTelephone},
+            #{venueName},
+            #{venuePosition},
+            #{venueDescription},
+            #{venueOpenType},
+            #{businessHours},
+            #{venuePlan},
+            #{venuePanorama},
+            #{bookingTips},
+            #{venueService},
+            #{creator},
+            #{gmtCreate},
+            #{modifier},
+            #{gmtModified},
+            #{isDelete}
+        )
+    </insert>
+
+    <!-- 删除场馆信息表 -->
+    <update id="removeVenuesInfo" parameterType="map">
+        UPDATE
+            gen_venues_info
+        SET
+            is_delete = 1,
+            modifier = #{modifier},
+            gmt_modified = #{gmtModified}
+        WHERE
+            venues_info_id IN
+        <foreach collection="venuesInfoIds" index="index" open="(" separator="," close=")">
+            #{venuesInfoIds[${index}]}
+        </foreach>
+    </update>
+
+    <!-- 修改场馆信息表 -->
+    <update id="updateVenuesInfo" parameterType="map">
+        UPDATE
+            gen_venues_info
+        SET
+        <if test="venueCity != null and venueCity != ''">
+            venue_city = #{venueCity},
+        </if>
+        <if test="venueOtherService != null and venueOtherService != ''">
+            venue_other_service = #{venueOtherService},
+        </if>
+        <if test="venueCharge != null and venueCharge != ''">
+            venue_charge = #{venueCharge},
+        </if>
+        <if test="venueRoute != null and venueRoute != ''">
+            venue_route = #{venueRoute},
+        </if>
+        <if test="venueArea != null and venueArea != ''">
+            venue_area = #{venueArea},
+        </if>
+        <if test="longitude != null and longitude != ''">
+            longitude = #{longitude},
+        </if>
+        <if test="latitude != null and latitude != ''">
+            latitude = #{latitude},
+        </if>
+        <if test="venueTelephone != null and venueTelephone != ''">
+            venue_telephone = #{venueTelephone},
+        </if>
+        <if test="venueName != null and venueName != ''">
+            venue_name = #{venueName},
+        </if>
+        <if test="venuePosition != null and venuePosition != ''">
+            venue_position = #{venuePosition},
+        </if>
+        <if test="venueDescription != null and venueDescription != ''">
+            venue_description = #{venueDescription},
+        </if>
+        <if test="venueOpenType != null">
+            venue_open_type = #{venueOpenType},
+        </if>
+        <if test="businessHours != null and businessHours != ''">
+            business_hours = #{businessHours},
+        </if>
+        <if test="venuePlan != null and venuePlan != ''">
+            venue_plan = #{venuePlan},
+        </if>
+        <if test="venuePanorama != null and venuePanorama != ''">
+            venue_panorama = #{venuePanorama},
+        </if>
+        <if test="bookingTips != null and bookingTips != ''">
+            booking_tips = #{bookingTips},
+        </if>
+        <if test="venueService != null and venueService != ''">
+            venue_service = #{venueService},
+        </if>
+            modifier = #{modifier},
+            gmt_modified = #{gmtModified}
+        WHERE
+            venues_info_id = #{venuesInfoId}
+    </update>
+
+    <!-- 场馆信息表详情 -->
+    <select id="getVenuesInfo" parameterType="map" resultMap="venuesInfoDTO">
+        SELECT
+            t1.venue_city,
+            t1.venue_other_service,
+            t1.venue_charge,
+            t1.venue_route,
+            t1.venue_area,
+            t1.longitude,
+            t1.latitude,
+            t1.venue_telephone,
+            t1.venue_name,
+            t1.venue_position,
+            t1.venue_description,
+            t1.venue_open_type,
+            t1.business_hours,
+            t1.venue_plan,
+            t1.venue_panorama,
+            t1.booking_tips,
+            t1.venue_service,
+            t1.venues_info_id
+        FROM
+            gen_venues_info t1
+        WHERE
+            t1.is_delete = 0
+        <if test="venuesInfoId != null and venuesInfoId != ''">
+        AND
+            t1.venues_info_id = #{venuesInfoId}
+        </if>
+    </select>
+
+    <!-- 场馆信息表列表 -->
+    <select id="listVenuesInfo" parameterType="map" resultMap="venuesInfoDTO">
+        SELECT
+            t1.venue_city,
+            t1.venue_other_service,
+            t1.venue_charge,
+            t1.venue_route,
+            t1.venue_area,
+            t1.venue_telephone,
+            t1.venue_name,
+            t1.venue_position,
+            t1.venue_description,
+            t1.venue_open_type,
+            t1.business_hours,
+            t1.venue_plan,
+            t1.venue_panorama,
+            t1.booking_tips,
+            t1.venue_service,
+            t1.venues_info_id
+        FROM
+            gen_venues_info t1
+        WHERE
+            t1.is_delete = 0
+        <if test="keywords != null and keywords != ''">
+            AND (
+                t1.venue_name like CONCAT('%',CONCAT(#{keywords},'%'))
+                or
+                t1.venue_telephone like CONCAT('%',CONCAT(#{keywords},'%'))
+                or
+                t1.venue_description like CONCAT('%',CONCAT(#{keywords},'%'))
+            )
+        </if>
+        <if test="data_authority != null and data_authority != ''">
+            <if test="data_authority == 'self' ">
+                AND t1.creator = #{creator}
+            </if>
+            <if test="data_authority != 'self'">
+                AND t1.creator IN
+                <foreach collection="data_creators" open="(" close=")" separator="," index="index">
+                    #{data_creators[${index}]}
+                </foreach>
+            </if>
+        </if>
+        <if test="venuesInfoIds != null and venuesInfoIds.size > 0">
+            AND t1.venues_info_id IN
+            <foreach collection="venuesInfoIds" index="index" open="(" separator="," close=")">
+                #{venuesInfoIds[${index}]}
+            </foreach>
+        </if>
+        GROUP BY
+            t1.venue_city,
+            t1.venue_other_service,
+            t1.venue_charge,
+            t1.venue_route,
+            t1.venue_area,
+            t1.longitude,
+            t1.latitude,
+            t1.venue_telephone,
+            t1.venue_name,
+            t1.venue_position,
+            t1.venue_description,
+            t1.venue_open_type,
+            t1.business_hours,
+            t1.venue_plan,
+            t1.venue_panorama,
+            t1.booking_tips,
+            t1.venue_service,
+            t1.venues_info_id
+    </select>
+
+    <!-- 小程序-根据项目分类查询场馆-->
+    <select id="listVenuesByKeyWords" parameterType="map" resultMap="venuesInfoDTO">
+        SELECT DISTINCT
+            t1.venues_info_id,
+            t1.venue_name,
+            t1.venue_position,
+            t1.venue_panorama,
+            t1.venue_telephone
+        FROM
+            gen_venues_info t1
+        <if test="projectCategory != null and projectCategory !='' ">
+          LEFT JOIN gen_venues_project t2 ON t1.venues_info_id = t2.venue_id
+        </if>
+        WHERE
+            t1.is_delete = 0
+        <if test="projectCategory != null and projectCategory !='' ">
+            AND t2.project_category = #{projectCategory}
+        </if>
+        <if test="venueCity != null and venueCity != ''">
+            AND t1.venue_city = #{venueCity}
+        </if>
+        <if test="venueArea != null and venueArea != ''">
+            AND t1.venue_area = #{venueArea}
+        </if>
+    </select>
+
+    <insert id="saveVenueOwner" parameterType="map">
+        INSERT INTO gen_venue_ow
+            (ow_id,venues_info_id,user_id)
+        VALUES
+            (#{owId},#{venuesInfoId},#{creator})
+    </insert>
+
+    <!-- 小程序-场馆详情信息-->
+    <select id="getVenuesInfoDetailForMiniApp" parameterType="map" resultMap="venuesInfoDTO">
+        SELECT
+            t1.venues_info_id,
+            t1.venue_panorama,
+            t1.venue_name,
+            t1.venue_position,
+            t1.longitude,
+            t1.latitude,
+            t1.business_hours,
+            t1.venue_description,
+            t1.venue_telephone,
+            t1.venue_route,
+            GROUP_CONCAT(t2.dictionary_name) venue_service,
+            t1.venue_other_service,
+            t1.booking_tips
+        FROM
+            gen_venues_info t1
+        LEFT JOIN data_dictionary t2 ON FIND_IN_SET(t2.dictionary_id,t1.venue_service)
+        WHERE
+            t1.is_delete = 0
+        AND t1.venues_info_id = #{venuesInfoId}
+        GROUP BY
+            t1.venue_panorama,
+            t1.venue_description,
+            t1.venue_plan,
+            t1.venue_name,
+            t1.venue_telephone,
+            t1.venue_route,
+            t1.venue_other_service
+    </select>
+
+    <!-- 小程序-根据城市名字查询字典信息-->
+    <select id="getCityInfoByName" parameterType="map" resultType="map">
+        SELECT
+            dictionary_id dictionaryId,
+            dictionary_name dictionaryName
+        FROM
+            data_dictionary
+        WHERE
+            dictionary_name LIKE CONCAT('%',CONCAT(#{cityName}, '%'))
+        AND is_delete = 0
+    </select>
+</mapper>

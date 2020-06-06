@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <base href="/venuebooking/">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="assets/fonts/font-awesome/css/font-awesome.css"/>
+    <link rel="stylesheet" href="assets/layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="assets/layuiadmin/style/admin.css" media="all">
+    <link rel="stylesheet" href="assets/layuiadmin/style/login.css" media="all">
+    <link rel="stylesheet" href="assets/js/vendor/viewer/viewer.min.css" media="all">
+</head>
+<body>
+    <div class="layadmin-user-login layadmin-user-display-show" id="LAY-user-login" style="display: none;">
+        <div class="layadmin-user-login-main">
+            <form class="layui-form layui-form-pane" lay-filter="dataForm">
+                <div class="layadmin-user-login-box layadmin-user-login-header">
+                    <h2>入驻申请</h2>
+                    <p>包头市体育局全民健身平台</p>
+                </div>
+                <div class="layadmin-user-login-box layadmin-user-login-body layui-form">
+                    <div class="layui-form-item">
+                        <label class="layadmin-user-login-icon layui-icon layui-icon-home" for="LAY-user-login-home"></label>
+                        <input type="text" name="orgName" id="LAY-user-login-home" autocomplete="off" placeholder="入驻单位名称" class="layui-input" lay-verify="required">
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layadmin-user-login-icon layui-icon layui-icon-username" for="LAY-user-login-username"></label>
+                        <input type="text" name="userName" id="LAY-user-login-username" autocomplete="off" placeholder="负责人姓名" class="layui-input" lay-verify="required">
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layadmin-user-login-icon layui-icon layui-icon-cellphone" for="LAY-user-login-cellphone"></label>
+                        <input type="text" name="cellphone" id="LAY-user-login-cellphone" autocomplete="off" placeholder="手机号码" class="layui-input" lay-verify="phone">
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layadmin-user-login-icon layui-icon layui-icon-location" for="LAY-user-login-location"></label>
+                        <input type="text" name="location" id="LAY-user-login-location" autocomplete="off" placeholder="详细地址" class="layui-input" lay-verify="required">
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">营业执照</label>
+                        <div class="layui-input-block">
+                            <input type="hidden" id="papers" name="papers">
+                            <div class="layui-btn-container" id="papersFileBox" style="border: 1px solid #e6e6e6;"></div>
+                            <script id="papersFileDownload" type="text/html">
+                                {{# var fileName = 'papers'; }}
+                                {{# if(d[fileName].length > 0) { }}
+                                {{#    var files = d[fileName];}}
+                                {{#    for(var i = 0, item = files[i]; item = files[i++];) { }}
+                                <div class="upload-image-box">
+                                    <span class="upload-image-span">
+                                        <img src="route/file/downloadfile/false/{{item.fileId}}" align="加载失败">
+                                    </span>
+                                    <a class="layui-btn layui-btn-xs layui-btn-danger text-danger remove-image" href="javascript:void(0);"
+                                       lay-form-button data-id="{{item.fileId}}" data-name="{{fileName}}" lay-filter="papersRemoveFile">
+                                        <i class="fa fa-trash-o"></i>
+                                    </a>
+                                </div>
+                                {{#    } }}
+                                {{# } }}
+                                {{# if(d[fileName].length < 9) { }}
+                                <div class="upload-image-box" style="width: auto; height: auto; padding: 5px;">
+                                    <a href="javascript:void(0);" lay-form-button data-explain="文件上传" data-name="papers" lay-filter="papersUploadFile">
+                                        <i class="fa fa-plus-square-o" style="font-size: 70px;"></i>
+                                    </a>
+                                </div>
+                                {{# } }}
+                            </script>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <button type="button" class="layui-btn layui-btn-fluid" lay-submit lay-filter="submitForm">提 交</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+<script src="assets/js/vendor/viewer/viewer.min.js"></script>
+<script src="assets/layuiadmin/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: 'assets/layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'form', 'laytpl', 'dialog', 'restajax', 'datamessage'], function(){
+        var $ = layui.$;
+        var form = layui.form;
+        var laytpl = layui.laytpl;
+        window.dialog = layui.dialog;
+        window.restAjax = layui.restajax;
+        window.dataMessage = layui.datamessage;
+        var viewerObj = {};
+
+        // 初始图片上传
+        function initPapersUploadFile() {
+            var files = $('#papers').val();
+            initFileList('papers', files, function(fileName) {
+                var viewer = new Viewer(document.getElementById(fileName +'FileBox'), {navbar: false});
+                viewerObj[fileName] = viewer;
+            });
+            form.on('button(papersUploadFile)', function(obj) {
+                var name = this.dataset.name;
+                var explain = this.dataset.explain;
+                top.dialog.file({
+                    type: 'image',
+                    title: '上传'+ explain,
+                    width: '400px',
+                    height: '420px',
+                    maxFileCount: '1',
+                    onClose: function() {
+                        var uploadFileArray = top.dialog.dialogData.uploadFileArray;
+                        if(typeof(uploadFileArray) != 'undefined' && uploadFileArray.length > 0) {
+                            var files = $('#'+ name).val();
+                            for(var j = 0, file = uploadFileArray[j]; file = uploadFileArray[j++];) {
+                                if(files.length > 0) {
+                                    files += ',';
+                                }
+                                files += file.data;
+                            }
+                            initFileList(name, files, function(fileName) {
+                                viewerObj[fileName].update();
+                            });
+                        }
+                    }
+                });
+            });
+            form.on('button(papersRemoveFile)', function(obj) {
+                var name = this.dataset.name;
+                var id = this.dataset.id;
+                var files = $('#'+ name).val().replace(id, '');
+                files = files.replace(/\,+/g, ',');
+                if(files.charAt(0) == ',') {
+                    files = files.substring(1);
+                }
+                if(files.charAt(files.length - 1) == ',') {
+                    files = files.substring(0, files.length - 1);
+                }
+                initFileList(name, files, function(fileName) {
+                    viewerObj[fileName].update();
+                });
+            });
+        }
+        initPapersUploadFile();
+
+        // 初始化文件列表
+        function initFileList(fileName, ids, callback) {
+            var dataForm = {};
+            dataForm[fileName] = ids;
+            form.val('dataForm', dataForm);
+            if(!ids) {
+                refreshDownloadTemplet(fileName, []);
+                if(callback) {
+                    callback(fileName, []);
+                }
+                return;
+            }
+            top.restAjax.get(top.restAjax.path('api/file/listfilebyfileid', []), {
+                ids: ids
+            }, null, function(code, data) {
+                refreshDownloadTemplet(fileName, data);
+                if(callback) {
+                    callback(fileName, data);
+                }
+            }, function(code, data) {
+                top.dialog.msg(data.msg);
+            });
+        }
+
+        function refreshDownloadTemplet(fileName, file) {
+            var dataRander = {};
+            dataRander[fileName] = file;
+            laytpl(document.getElementById(fileName +'FileDownload').innerHTML).render(dataRander, function(html) {
+                document.getElementById(fileName +'FileBox').innerHTML = html;
+            });
+        }
+
+        // 提交表单
+        form.on('submit(submitForm)', function(formData) {
+            if(formData.field['papers'] === ''){
+                layer.msg("请上传相关证件");
+                return;
+            }
+            top.dialog.confirm(top.dataMessage.commit, function(index) {
+                top.dialog.close(index);
+                var loadLayerIndex;
+                top.restAjax.post(top.restAjax.path('api/webregister/saveregisterinfo', []), formData.field, null, function(code, data) {
+                    window.location.href = "/venuebooking";
+                }, function(code, data) {
+                    top.dialog.msg(data.msg);
+                }, function() {
+                    loadLayerIndex = top.dialog.msg(top.dataMessage.committing, {icon: 16, time: 0, shade: 0.3});
+                }, function() {
+                    top.dialog.close(loadLayerIndex);
+                });
+            });
+            return false;
+        });
+
+        // 校验
+        form.verify({
+        });
+    });
+</script>
+</body>
+</html>

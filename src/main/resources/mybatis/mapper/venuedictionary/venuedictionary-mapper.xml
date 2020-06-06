@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cm.venuebooking.dao.venuedictionary.IVenueDictionaryDao">
+
+    <resultMap id="venueDictionaryDTO" type="com.cm.venuebooking.pojo.dtos.venuedictionary.VenueDictionaryDTO">
+        <id property="dictionaryId" column="dictionary_id"/>
+        <result property="dictionaryParentId" column="dictionary_parent_id"/>
+        <result property="dictionaryParentName" column="dictionary_parent_name"/>
+        <result property="dictionaryName" column="dictionary_name"/>
+        <result property="dictionaryIcon" column="dictionary_icon"/>
+        <result property="dictionarySummary" column="dictionary_summary"/>
+        <result property="dictionaryCode" column="dictionary_code"/>
+        <result property="dictionarySort" column="dictionary_sort"/>
+    </resultMap>
+
+    <!-- 新增字典 -->
+    <insert id="save" parameterType="map">
+        INSERT INTO data_dictionary(
+            dictionary_id,
+            dictionary_parent_id,
+            dictionary_name,
+            dictionary_icon,
+            dictionary_summary,
+            dictionary_code,
+            dictionary_sort,
+            creator,
+            gmt_create,
+            modifier,
+            gmt_modified,
+            is_delete
+        ) VALUES(
+            #{dictionaryId},
+            #{dictionaryParentId},
+            #{dictionaryName},
+            #{dictionaryIcon},
+            #{dictionarySummary},
+            #{dictionaryCode},
+            #{dictionarySort},
+            #{creator},
+            #{gmtCreate},
+            #{modifier},
+            #{gmtModified},
+            #{isDelete}
+        )
+    </insert>
+
+    <!-- 修改字典 -->
+    <update id="update" parameterType="map">
+        UPDATE
+            data_dictionary
+        SET
+        <if test="dictionaryName != null and dictionaryName != ''">
+            dictionary_name = #{dictionaryName},
+        </if>
+        <if test="dictionaryCode != null and dictionaryCode != ''">
+            dictionary_code = #{dictionaryCode},
+        </if>
+        <if test="dictionarySummary != null">
+            dictionary_summary = #{dictionarySummary},
+        </if>
+        <if test="dictionaryIcon != null">
+            dictionary_icon = #{dictionaryIcon},
+        </if>
+        <if test="dictionarySort != null">
+            dictionary_sort = #{dictionarySort},
+        </if>
+            modifier = #{modifier},
+            gmt_modified = #{gmtModified}
+        WHERE
+            dictionary_id = #{dictionaryId}
+    </update>
+
+
+    <!-- 字典详情 -->
+    <select id="getVenueDictionary" parameterType="map" resultMap="venueDictionaryDTO">
+        SELECT
+            t1.*,
+            t2.dictionary_name dictionary_parent_name
+        FROM
+            data_dictionary t1
+        LEFT JOIN
+            data_dictionary t2
+        ON
+            t1.dictionary_parent_id = t2.dictionary_id
+        AND
+            t2.is_delete = 0
+        WHERE
+            t1.is_delete = 0
+        <if test="dictionaryId != null and dictionaryId != ''">
+        AND
+            t1.dictionary_id = #{dictionaryId}
+        </if>
+    </select>
+
+</mapper>

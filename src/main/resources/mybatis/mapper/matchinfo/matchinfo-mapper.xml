@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cm.venuebooking.dao.matchinfo.IMatchInfoDao">
+
+    <resultMap id="matchInfoMap" type="com.cm.venuebooking.pojo.dtos.matchinfo.MatchInfoDTO">
+        <id column="match_id" property="matchId"/>
+        <result column="project_category" property="projectCategory"/>
+        <result column="front_cover" property="frontCover"/>
+        <result column="title" property="title"/>
+        <result column="match_abstract" property="matchAbstract"/>
+        <result column="sign_time_str" property="signTimeStr"/>
+        <result column="sign_time_end" property="signTimeEnd"/>
+        <result column="match_time_str" property="matchTimeStr"/>
+        <result column="match_time_end" property="matchTimeEnd"/>
+        <result column="match_place" property="matchPlace"/>
+        <result column="organizer" property="organizer"/>
+        <result column="undertaker" property="undertaker"/>
+        <result column="co_organizer" property="coOrganizer"/>
+        <result column="match_summary" property="matchSummary"/>
+        <result column="reward" property="reward"/>
+        <result column="route" property="route"/>
+        <result column="sign_attention" property="signAttention"/>
+        <result column="other_tips" property="otherTips"/>
+        <result column="publish_type" property="publishType"/>
+    </resultMap>
+
+    <resultMap id="matchInfoListMap" type="com.cm.venuebooking.pojo.dtos.matchinfo.MatchInfoListDTO">
+        <id column="match_id" property="matchId"/>
+        <result column="front_cover" property="frontCover"/>
+        <result column="title" property="title"/>
+        <result column="match_abstract" property="matchAbstract"/>
+        <result column="match_place" property="matchPlace"/>
+        <result column="match_time_str" property="matchTimeStr"/>
+        <result column="match_time_end" property="matchTimeEnd"/>
+    </resultMap>
+
+    <!-- 新增赛事信息 -->
+    <insert id="saveMatchInfo" parameterType="map">
+        INSERT INTO gen_match_info (
+            match_id, project_category, front_cover, title, match_abstract, match_summary,
+            publish_type, creator, gmt_create, modifier, gmt_modified, is_delete
+        ) VALUES(
+            #{matchId}, #{projectCategory}, #{frontCover}, #{title}, #{matchAbstract},#{matchSummary},
+            '1', #{creator},#{gmtCreate}, #{modifier}, #{gmtMmodified}, #{isDelete}
+        )
+    </insert>
+
+    <select id="getMatchInfoDetail" parameterType="map" resultMap="matchInfoMap">
+        SELECT
+            t1.match_id,
+            t2.dictionary_name project_category,
+            t1.front_cover,
+            t1.title,
+            t1.match_abstract,
+            t1.sign_time_str,
+            t1.sign_time_end,
+            t1.match_time_str,
+            t1.match_time_end,
+            t1.match_place,
+            t1.organizer,
+            t1.undertaker,
+            t1.co_organizer,
+            t1.match_summary,
+            t1.reward,
+            t1.route,
+            t1.sign_attention,
+            t1.other_tips,
+            t1.publish_type
+        FROM
+            gen_match_info t1
+        LEFT JOIN data_dictionary t2 ON t1.project_category = t2.dictionary_id
+        WHERE
+            t1.is_delete = 0
+        AND t1.publish_type = 1
+        AND t1.match_id = #{matchId}
+    </select>
+
+    <select id="listPageMatchInfo" parameterType="map" resultMap="matchInfoMap">
+        SELECT
+            t1.match_id,
+            t2.dictionary_name project_category,
+            t1.front_cover,
+            t1.title,
+            t1.match_abstract,
+            t1.sign_time_str,
+            t1.sign_time_end,
+            t1.match_time_str,
+            t1.match_time_end,
+            t1.match_place,
+            t1.organizer,
+            t1.undertaker,
+            t1.co_organizer,
+            t1.publish_type
+        FROM
+            gen_match_info t1
+        LEFT JOIN data_dictionary t2 ON t1.project_category = t2.dictionary_id
+        WHERE
+            t1.is_delete = 0
+    </select>
+
+    <select id="listMatchListInfo" parameterType="map" resultMap="matchInfoListMap">
+        SELECT
+            t1.match_id,
+            t1.front_cover,
+            t1.title,
+            t1.match_place,
+            t1.match_time_str,
+            t1.match_time_end
+        FROM
+            gen_match_info t1
+                LEFT JOIN data_dictionary t2 ON t1.project_category = t2.dictionary_id
+        WHERE
+            t1.is_delete = 0
+          AND t1.publish_type = 1
+    </select>
+
+</mapper>
