@@ -11,7 +11,6 @@ import com.cm.common.utils.UUIDUtil;
 import com.cm.venuebooking.dao.groundinfo.IGroundInfoDao;
 import com.cm.venuebooking.pojo.dtos.groundinfo.GroundInfoDTO;
 import com.cm.venuebooking.pojo.dtos.groundinfo.GroundItemDTO;
-import com.cm.venuebooking.pojo.dtos.venuesinfo.VenuesInfoDTO;
 import com.cm.venuebooking.service.BaseService;
 import com.cm.venuebooking.service.groundinfo.IGroundInfoService;
 import com.github.pagehelper.PageHelper;
@@ -63,7 +62,7 @@ public class GroundInfoServiceImpl extends BaseService implements IGroundInfoSer
                 param.put("groundItemId",UUIDUtil.getUUID());
                 param.put("timeStr",itemObj.getString("timeStr"));
                 param.put("timeEnd",itemObj.getString("timeEnd"));
-                param.put("price",itemObj.getString("price"));
+                param.put("price",StringUtils.isEmpty(itemObj.get("price"))? "0" : itemObj.getString("price"));
                 groundInfoDao.saveGroundItem(param);
             }
         }
@@ -81,6 +80,13 @@ public class GroundInfoServiceImpl extends BaseService implements IGroundInfoSer
         result.put("groundInfo",groundInfoDTO);
         result.put("itemList",itemList);
         return new SuccessResultData(result);
+    }
+
+    @Override
+    public GroundInfoDTO getGroundInfoById(String groundInfoId) {
+        Map<String, Object> param = getHashMap(2);
+        param.put("groundInfoId",groundInfoId);
+        return groundInfoDao.getGroundInfo(param);
     }
 
     @Override
@@ -145,6 +151,7 @@ public class GroundInfoServiceImpl extends BaseService implements IGroundInfoSer
 
     @Override
     public SuccessResultData listGroundInfoMiniApp(Map<String, Object> params) {
+        params.put("open","1");
         //查询场地
         List<GroundInfoDTO> groundInfoList = groundInfoDao.listGroundInfo(params);
         //查询场次
@@ -152,9 +159,21 @@ public class GroundInfoServiceImpl extends BaseService implements IGroundInfoSer
             for(GroundInfoDTO info : groundInfoList ){
                 params.put("groundInfoId",info.getGroundInfoId());
                 List<GroundItemDTO> itemList = groundInfoDao.listGroundItem(params);
+                for(GroundItemDTO item : itemList){
+                    item.setTimeStr(item.getTimeStr().substring(0,5));
+                    item.setTimeEnd(item.getTimeEnd().substring(0,5));
+                    item.setPrice(StringUtils.isEmpty(item.getPrice())? "0" : item.getPrice());
+                }
                 info.setGroundItemList(itemList != null ? itemList : new ArrayList<>(0));
             }
         }
         return new SuccessResultData(groundInfoList);
+    }
+
+    @Override
+    public GroundItemDTO getGroundItem(String groundItemId) {
+        Map<String, Object> param = getHashMap(2);
+        param.put("groundItemId",groundItemId);
+        return groundInfoDao.getGroundItem(param);
     }
 }

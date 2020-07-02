@@ -1,7 +1,6 @@
 package com.cm.venuebooking.service.venuesproject.impl;
 
 import com.cm.common.exception.RemoveException;
-import com.cm.common.exception.SaveException;
 import com.cm.common.exception.SearchException;
 import com.cm.common.pojo.ListPage;
 import com.cm.common.result.SuccessResult;
@@ -23,7 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName: VenuesProjectServiceImpl
@@ -143,7 +144,7 @@ public class VenuesProjectServiceImpl extends BaseService implements IVenuesProj
 
     @Override
     public Object listVenuesProjectWeChatProgram(String token, Map<String, Object> params) {
-        String id = StringUtils.isEmpty(params.get("id")) ? "f59ebf77-c2b7-49bc-8f58-2928bd2b450d" : params.get("pId").toString();
+        String id = StringUtils.isEmpty(params.get("id")) ? "f59ebf77-c2b7-49bc-8f58-2928bd2b450d" : params.get("id").toString();
         params.put("id",id);
         List<Map<String,Object>> list = venuesProjectDao.listVenuesProjectWeChatProgram(params);
         Map<String, Object> result = getHashMap(0);
@@ -159,10 +160,14 @@ public class VenuesProjectServiceImpl extends BaseService implements IVenuesProj
             for(VenuesProjectDTO item : list){
                 item.setBookingType("0");
                 param.put("venuesProjectId",item.getVenuesProjectId());
-                //查询该项目下是否有场地
+                //查询该项目下是否有可预订场次
                 List<GroundInfoDTO> groundInfoList = groundInfoService.listGroundInfo(param);
                 if(groundInfoList != null && groundInfoList.size() > 0){
-                    item.setBookingType("1");
+                    for(GroundInfoDTO groundInfoDTO : groundInfoList ){
+                        if("open".equals(groundInfoDTO.getOpenCloseType())){
+                            item.setBookingType("1");
+                        }
+                    }
                 }
             }
         }
@@ -179,6 +184,7 @@ public class VenuesProjectServiceImpl extends BaseService implements IVenuesProj
 
     @Override
     public SuccessResultList<List<VenuesProjectForListDTO>> listPageVenuesProjectLocal(ListPage page) throws SearchException{
+        setDataAuthorityInfo(page.getParams());
         page.getParams().put("creator",securityComponent.getCurrentUser().getUserId());
         PageHelper.startPage(page.getPage(), page.getRows());
         List<VenuesProjectForListDTO> venuesProjectForListDTOS = venuesProjectDao.listVenuesProjectLocal(page.getParams());

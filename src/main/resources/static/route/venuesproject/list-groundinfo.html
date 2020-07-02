@@ -17,9 +17,9 @@
             <div class="layui-card">
                 <div class="layui-card-header">
                     <span class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
-                        <a class="close" href="javascript:void(0);" id="backProjectList">返回项目列表</a>
+                        <a class="close" href="javascript:void(0);" style="color: #009688 !important" id="backProjectList">返回上级</a>
                             <span lay-separator="">/</span>
-                        <a href="javascript:void(0);"><cite>所有场地</cite></a>
+                        <a href="javascript:void(0);"><cite class="project-name">所有场地</cite></a>
                     </span>
                 </div>
                 <div class="layui-card-body">
@@ -60,7 +60,8 @@
         var tableUrl = 'api/groundinfo/listpagevenuesinfo';
         var venuesInfoId = top.restAjax.params(window.location.href).venuesInfoId;
         var venuesProjectId = top.restAjax.params(window.location.href).venuesProjectId;
-
+        var projectName = top.restAjax.params(window.location.href).projectName;
+        $('.project-name').html(projectName);
         // 初始化表格
         function initTable() {
             table.render({
@@ -80,15 +81,6 @@
                     {type:'checkbox', fixed: 'left'},
                     {field:'rowNum', width:80, title: '序号', fixed: 'left', align:'center', templet: '<span>{{d.LAY_INDEX}}</span>'},
                     {field: 'groundName', width: 300, title: '场地名字', align:'center',
-                        templet: function(row) {
-                            var rowData = row[this.field];
-                            if(typeof(rowData) === 'undefined' || rowData == null || rowData === '') {
-                                return '-';
-                            }
-                            return rowData;
-                        }
-                    },
-                    {field: 'groundLocation', width: 300, title: '具体位置', align:'center',
                         templet: function(row) {
                             var rowData = row[this.field];
                             if(typeof(rowData) === 'undefined' || rowData == null || rowData === '') {

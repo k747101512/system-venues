@@ -8,16 +8,86 @@
         <result property="userId" column="user_di"></result>
     </resultMap>
 
-    <resultMap id="groundTicketDTO" type="com.cm.venuebooking.pojo.dtos.bookingorder.GroundTicketDTO">
+    <resultMap id="groundBookingInfoDTO" type="com.cm.venuebooking.pojo.dtos.bookingorder.GroundBookingInfoDTO">
         <id property="groundBookingId" column="ground_booking_id"></id>
+        <result property="serial" column="serial"></result>
+        <result property="venuesInfoId" column="venues_info_id"></result>
+        <result property="venuesProjectId" column="venues_project_id"></result>
         <result property="groundInfoId" column="ground_info_id"></result>
+        <result property="groundItemId" column="ground_item_id"></result>
         <result property="userName" column="user_name"></result>
         <result property="idCardNumber" column="id_card_number"></result>
         <result property="phoneNumber" column="phone_number"></result>
         <result property="bookingOrderDate" column="booking_order_date"></result>
-        <result property="arriveType" column="arrive_type"></result>
-        <result property="cancel" column="cancel"></result>
+        <result property="singlePrice" column="single_price"></result>
+        <result property="orderType" column="order_type"></result>
     </resultMap>
+
+    <resultMap id="myTicketListDTO" type="com.cm.venuebooking.pojo.dtos.bookingorder.MyTicketListDTO">
+        <result property="serial" column="serial"></result>
+        <result property="bookingDate" column="gmt_create"></result>
+        <result property="venueName" column="venue_name"></result>
+        <result property="price" column="price"></result>
+    </resultMap>
+
+    <resultMap id="venueProjectDTO" type="com.cm.venuebooking.pojo.dtos.bookingorder.VenueProjectDTO">
+        <result property="venuesInfoId" column="venues_info_id"></result>
+        <result property="venueName" column="venue_name"></result>
+        <result property="venuesProjectId" column="venues_project_id"></result>
+        <result property="projectName" column="project_name"></result>
+    </resultMap>
+
+    <resultMap id="bookingOrderList" type="com.cm.venuebooking.pojo.dtos.bookingorder.BookingOrderList">
+        <id property="bookingItemId" column="booking_item_id"></id>
+        <result property="serial" column="serial"></result>
+        <result property="venuesName" column="venues_name"></result>
+        <result property="projectName" column="project_name"></result>
+        <result property="groundName" column="ground_name"></result>
+        <result property="bookingOrderDate" column="booking_order_date"></result>
+        <result property="timeStr" column="time_str"></result>
+        <result property="timeEnd" column="time_end"></result>
+        <result property="price" column="price"></result>
+        <result property="gmtCreate" column="gmt_create"></result>
+        <result property="nickName" column="nick_name"></result>
+        <result property="userId" column="user_id"></result>
+    </resultMap>
+
+    <select id="listPageBookingOrder" parameterType="map" resultMap="bookingOrderList">
+        SELECT
+            t1.booking_item_id,
+            t2.venues_name,
+            t2.project_name,
+            t1.ground_name,
+            t1.booking_order_date,
+            t1.time_str,
+            t1.time_end,
+            t1.price,
+            t1.gmt_create,
+            t2.nick_name,
+            t2.user_id
+        FROM
+            gen_booking_item t1
+        LEFT JOIN gen_booking_info t2 ON t2.ground_booking_id = t1.booking_info_id
+        WHERE
+            t1.is_delete = '0'
+        AND t1.order_type = '0'
+        <if test="data_authority != null and data_authority != ''">
+            <if test="data_authority == 'self' ">
+                AND FIND_IN_SET(t2.venues_info_id,#{venuesInfoIds})
+            </if>
+        </if>
+        <if test="keywords != null and keywords != ''">
+            AND (
+                t2.venues_name LIKE CONCAT('%',#{keywords},'%')
+                OR
+                t2.serial LIKE CONCAT('%',#{keywords},'%')
+                OR
+                t2.project_name LIKE CONCAT('%',#{keywords},'%')
+            )
+        </if>
+        ORDER BY
+            t1.gmt_create DESC,t1.booking_order_date ASC
+    </select>
 
     <select id="listVenuesInfoOw" parameterType="map" resultMap="venuesInfoOwDTO">
         SELECT
@@ -30,21 +100,61 @@
             t1.user_id = #{userId}
     </select>
 
-    <select id="listPageBookingOrder" parameterType="map" resultMap="groundTicketDTO">
+    <!-- 小程序使用-->
+    <insert id="saveBookingInfo" parameterType="map">
+        INSERT INTO gen_booking_info
+        (ground_booking_id,serial,venues_info_id,venues_name,venues_project_id,project_name,user_id,nick_name,id_card_number,
+         phone_number,order_type,creator,gmt_create,modifier,gmt_modified,is_delete)
+        VALUES
+        (#{groundBookingId},#{serial},#{venuesInfoId},#{venuesName},#{venuesProjectId},#{projectName},#{userId},#{nickName},#{idCardNumber},
+         #{phoneNumber},#{orderType},#{creator},#{gmtCreate},#{modifier},#{gmtModified},#{isDelete})
+    </insert>
+
+    <insert id="saveBookingItem" parameterType="map">
+        INSERT INTO gen_booking_item
+        (booking_item_id,booking_info_id,ground_item_id,ground_name,booking_order_date,time_str,time_end,price,arrive_type,
+         creator,gmt_create,modifier,gmt_modified,is_delete)
+        VALUES
+        (#{bookingItemId},#{bookingInfoId},#{groundItemId},#{groundName},#{bookingOrderDate},#{timeStr},#{timeEnd},
+         #{price},#{arriveType},#{creator},#{gmtCreate},#{modifier},#{gmtModified},#{isDelete})
+    </insert>
+
+    <select id="listPageMyTicket" parameterType="map" resultMap="bookingOrderList">
         SELECT
-            t1.ground_booking_id,
-            t1.ground_info_id,
-            t1.user_name,
-            t1.id_card_number,
-            t1.phone_number,
+            t1.booking_item_id,
+            t2.venues_name,
+            t2.project_name,
+            t1.ground_name,
             t1.booking_order_date,
-            t1.arrive_type
+            t1.time_str,
+            t1.time_end,
+            t1.price,
+            t1.gmt_create,
+            t2.nick_name,
+            t2.user_id
         FROM
-            gen_ground_ticket t1
-        LEFT JOIN gen_ground_info t2 ON t2.ground_info_id = t1.ground_info_id
+            gen_booking_item t1
+        LEFT JOIN gen_booking_info t2 ON t2.ground_booking_id = t1.booking_info_id
         WHERE
-            t1.is_delete = 0
-        AND FIND_IN_SET(t2.venues_info_id,#{venuesInfoId})
-        ORDER BY t1.booking_order_date DESC
+            t1.is_delete = '0'
+        AND t2.user_id = #{userId}
+        AND CONCAT(t1.booking_order_date,' ',t1.time_end) > #{nowDateTime}
+        ORDER BY
+        t1.order_type ASC,t1.booking_order_date ASC
     </select>
+
+    <select id="getVenueFromProject" parameterType="map" resultMap="venueProjectDTO">
+        SELECT
+            t1.venues_project_id,
+            t2.dictionary_name project_name,
+            t3.venues_info_id,
+            t3.venue_name
+        FROM
+            gen_venues_project t1
+                LEFT JOIN data_dictionary t2 ON t2.dictionary_id = t1.project_category
+                LEFT JOIN gen_venues_info t3 ON t3.venues_info_id = t1.venue_id
+        WHERE
+            t1.venues_project_id = #{venuesProjectId}
+    </select>
+
 </mapper>

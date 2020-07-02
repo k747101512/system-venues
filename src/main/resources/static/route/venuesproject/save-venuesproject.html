@@ -22,18 +22,6 @@
         <div class="layui-card-body" style="padding: 15px;">
             <form class="layui-form layui-form-pane" lay-filter="dataForm">
                 <div class="layui-form-item">
-                    <label class="layui-form-label">所属场馆</label>
-                    <div class="layui-input-block layui-form" id="venueSelectTemplateBox" lay-filter="venueSelectTemplateBox"></div>
-                    <script id="venueSelectTemplate" type="text/html">
-                        <select id="venueId" name="venueId" lay-verify="required">
-                            <option value="">请选择</option>
-                            {{# for(var i = 0, item; item = d[i++];) { }}
-                            <option value="{{item.venuesInfoId}}">{{item.venueName}}</option>
-                            {{# } }}
-                        </select>
-                    </script>
-                </div>
-                <div class="layui-form-item">
                     <label class="layui-form-label">项目类别</label>
                     <div class="layui-input-block layui-form" id="projectSelectTemplateBox" lay-filter="projectSelectTemplateBox"></div>
                     <script id="projectSelectTemplate" type="text/html">
@@ -46,9 +34,9 @@
                     </script>
                 </div>
                 <div class="layui-form-item layui-form-text">
-                    <label class="layui-form-label">项目描述</label>
+                    <label class="layui-form-label">项目简介</label>
                     <div class="layui-input-block">
-                        <textarea id="projectDescription" name="projectDescription" class="layui-textarea" placeholder="请输入项目描述"></textarea>
+                        <textarea id="projectDescription" name="projectDescription" class="layui-textarea" placeholder="根据实际情况简单填写介绍"></textarea>
                     </div>
                 </div>
                 <div class="layui-form-item" pane>
@@ -82,19 +70,7 @@
         var $ = layui.$;
         var form = layui.form;
         var laytpl = layui.laytpl;
-
-        // 初始化场馆列表
-        function initVenuesInfoSelect() {
-            top.restAjax.get(top.restAjax.path('api/venuesinfo/listvenuesinfo', []), {}, null, function(code, data, args) {
-                laytpl(document.getElementById('venueSelectTemplate').innerHTML).render(data, function(html) {
-                    document.getElementById('venueSelectTemplateBox').innerHTML = html;
-                });
-                form.render('select', 'venueSelectTemplateBox');
-            }, function(code, data) {
-                top.dialog.msg(data.msg);
-            });
-        }
-        initVenuesInfoSelect();
+        var venueId = top.restAjax.params(window.location.href).venuesInfoId;
 
         // 初始化项目分类
         function initProjectSelect() {
@@ -196,6 +172,7 @@
             top.dialog.confirm(top.dataMessage.commit, function(index) {
                 top.dialog.close(index);
                 var loadLayerIndex;
+                formData.field['venueId'] = venueId;
                 formData.field['facilities'] = top.restAjax.checkBoxToString(formData.field, 'facilities');
                 top.restAjax.post(top.restAjax.path('api/venuesproject/savevenuesproject', []), formData.field, null, function(code, data) {
                     var layerIndex = top.dialog.msg(top.dataMessage.commitSuccess, {

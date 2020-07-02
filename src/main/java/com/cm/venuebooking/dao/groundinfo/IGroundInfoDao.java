@@ -76,4 +76,10 @@ public interface IGroundInfoDao {
      */
     List<GroundInfoDTO> listGroundInfo(Map<String, Object> param);
 
+    /**
+     * 查询场次时刻(单条)
+     * @param param
+     * @return
+     */
+    GroundItemDTO getGroundItem(Map<String, Object> param);
 }

@@ -22,71 +22,11 @@
         </div>
         <div class="layui-card-body" style="padding: 15px;">
             <form class="layui-form layui-form-pane" lay-filter="dataForm">
-                <div class="layui-form-item">
-                    <label class="layui-form-label">文章类别</label>
-                    <div class="layui-input-block layui-form" id="articleCategoryIdJoinTemplateBox" lay-filter="articleCategoryIdJoinTemplateBox"></div>
-                    <script id="articleCategoryIdJoinTemplate" type="text/html">
-                        <select name="articleCategoryId" lay-search>
-                            <option value="">选择文章类别</option>
-                            {{# for(var i = 0, item; item = d[i++];) { }}
-                            <option value="{{item.articleCategoryId}}">{{item.title}}</option>
-                            {{# } }}
-                        </select>
-                    </script>
-                </div>
+                <input type="hidden" id="articleCategoryId" name="articleCategoryId" value="">
                 <div class="layui-form-item">
                     <label class="layui-form-label">标题</label>
                     <div class="layui-input-block">
                         <input type="text" id="title" name="title" class="layui-input" value="" placeholder="请输入标题" lay-verify="required">
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">子标题</label>
-                    <div class="layui-input-block">
-                        <input type="text" id="subTitle" name="subTitle" class="layui-input" value="" placeholder="请输入子标题" >
-                    </div>
-                </div>
-                <div class="layui-form-item layui-form-text">
-                    <label class="layui-form-label">概述</label>
-                    <div class="layui-input-block">
-                        <textarea id="summary" name="summary" class="layui-textarea" placeholder="请输入概述"></textarea>
-                    </div>
-                </div>
-                <div class="layui-form-item layui-form-text">
-                    <label class="layui-form-label">图片</label>
-                    <div class="layui-input-block">
-                        <input type="hidden" id="images" name="images">
-                        <div class="layui-btn-container" id="imagesFileBox" style="border: 1px solid #e6e6e6;"></div>
-                        <script id="imagesFileDownload" type="text/html">
-                            {{# var fileName = 'images'; }}
-                            {{# if(d[fileName].length > 0) { }}
-                            {{#    var files = d[fileName];}}
-                            {{#    for(var i = 0, item = files[i]; item = files[i++];) { }}
-                            <div class="upload-image-box">
-                                <span class="upload-image-span">
-                                    <img src="route/file/downloadfile/false/{{item.fileId}}" align="加载失败">
-                                </span>
-                                <a class="layui-btn layui-btn-xs layui-btn-danger text-danger remove-image" href="javascript:void(0);"
-                                   lay-form-button data-id="{{item.fileId}}" data-name="{{fileName}}" lay-filter="imagesRemoveFile">
-                                    <i class="fa fa-trash-o"></i>
-                                </a>
-                            </div>
-                            {{#    } }}
-                            {{# } }}
-                            {{# if(d[fileName].length < 9) { }}
-                            <div class="upload-image-box" style="width: auto; height: auto; padding: 5px;">
-                                <a href="javascript:void(0);" lay-form-button data-explain="文件上传" data-name="images" lay-filter="imagesUploadFile">
-                                    <i class="fa fa-plus-square-o" style="font-size: 70px;"></i>
-                                </a>
-                            </div>
-                            {{# } }}
-                        </script>
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">外链地址</label>
-                    <div class="layui-input-block">
-                        <input type="text" id="link" name="link" class="layui-input" value="" placeholder="请输入外链地址，http或https开头，列表点击跳转到对应页面。">
                     </div>
                 </div>
                 <div class="layui-row">
@@ -125,6 +65,37 @@
                     </div>
                 </div>
                 <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">图片</label>
+                    <div class="layui-input-block">
+                        <input type="hidden" id="images" name="images" lay-verify="needPhoto">
+                        <div class="layui-btn-container" id="imagesFileBox" style="border: 1px solid #e6e6e6;"></div>
+                        <script id="imagesFileDownload" type="text/html">
+                            {{# var fileName = 'images'; }}
+                            {{# if(d[fileName].length > 0) { }}
+                            {{#    var files = d[fileName];}}
+                            {{#    for(var i = 0, item = files[i]; item = files[i++];) { }}
+                            <div class="upload-image-box">
+                                <span class="upload-image-span">
+                                    <img src="route/file/downloadfile/false/{{item.fileId}}" align="加载失败">
+                                </span>
+                                <a class="layui-btn layui-btn-xs layui-btn-danger text-danger remove-image" href="javascript:void(0);"
+                                   lay-form-button data-id="{{item.fileId}}" data-name="{{fileName}}" lay-filter="imagesRemoveFile">
+                                    <i class="fa fa-trash-o"></i>
+                                </a>
+                            </div>
+                            {{#    } }}
+                            {{# } }}
+                            {{# if(d[fileName].length < 9) { }}
+                            <div class="upload-image-box" style="width: auto; height: auto; padding: 5px;">
+                                <a href="javascript:void(0);" lay-form-button data-explain="文件上传" data-name="images" lay-filter="imagesUploadFile">
+                                    <i class="fa fa-plus-square-o" style="font-size: 70px;"></i>
+                                </a>
+                            </div>
+                            {{# } }}
+                        </script>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
                     <div class="layui-input-block">
                         <script id="content" name="content" type="text/plain"></script>
                     </div>
@@ -157,12 +128,12 @@
         var laydate = layui.laydate;
         var ueEditorObj = {};
         var viewerObj = {};
-
+        var articleCategoryId = top.restAjax.params(window.location.href).articleCategoryId;
+        $('#articleCategoryId').val(articleCategoryId);
         // 初始化内容
         function initData() {
             initPublishDateDate();
             initContentRichText();
-            initArticleCategoryIdJoinTable();
             initImagesUploadFile();
         }
         initData();
@@ -174,6 +145,7 @@
                 viewerObj[fileName] = viewer;
             });
             form.on('button(imagesUploadFile)', function(obj) {
+
                 var name = this.dataset.name;
                 var explain = this.dataset.explain;
                 top.dialog.file({
@@ -267,18 +239,6 @@
             ueEditorObj['content'] = editor;
         }
 
-        // 初始化文章类别联表
-        function initArticleCategoryIdJoinTable(){
-            top.restAjax.get(top.restAjax.path('api/articlecategory/listarticlecategory', []), {}, null, function(code, data, args) {
-                laytpl(document.getElementById('articleCategoryIdJoinTemplate').innerHTML).render(data, function(html) {
-                    document.getElementById('articleCategoryIdJoinTemplateBox').innerHTML = html;
-                });
-                form.render('select', 'articleCategoryIdJoinTemplateBox');
-            }, function(code, data) {
-                top.dialog.msg(data.msg);
-            });
-        }
-
         // 提交表单
         form.on('submit(submitForm)', function(formData) {
             top.dialog.confirm(top.dataMessage.commit, function(index) {
@@ -319,6 +279,11 @@
 
         // 校验
         form.verify({
+            needPhoto : function(value){
+                if (!value) {
+                    return '至少上传一张图片';
+                }
+            }
         });
     });
 </script>

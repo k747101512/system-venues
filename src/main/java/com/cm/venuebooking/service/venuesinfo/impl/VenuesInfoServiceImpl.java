@@ -2,16 +2,17 @@ package com.cm.venuebooking.service.venuesinfo.impl;
 
 import com.cm.common.component.SecurityComponent;
 import com.cm.common.exception.RemoveException;
-import com.cm.common.exception.SaveException;
 import com.cm.common.exception.SearchException;
-import com.cm.common.plugin.pojo.dtos.datadictionary.DataDictionaryDTO;
 import com.cm.common.pojo.ListPage;
+import com.cm.common.pojo.bos.UserInfoBO;
+import com.cm.common.pojo.dtos.ZTreeDTO;
 import com.cm.common.result.SuccessResult;
 import com.cm.common.result.SuccessResultData;
 import com.cm.common.result.SuccessResultList;
 import com.cm.common.utils.DateUtil;
 import com.cm.common.utils.HashMapUtil;
 import com.cm.common.utils.UUIDUtil;
+import com.cm.common.utils.point.Point;
 import com.cm.venuebooking.dao.venuesinfo.IVenuesInfoDao;
 import com.cm.venuebooking.dao.venuesproject.IVenuesProjectDao;
 import com.cm.venuebooking.pojo.dtos.venuesinfo.VenuesInfoDTO;
@@ -19,16 +20,18 @@ import com.cm.venuebooking.pojo.dtos.venuesproject.VenuesProjectDTO;
 import com.cm.venuebooking.pojo.vos.venuesinfo.VenuesInfoVO;
 import com.cm.venuebooking.service.BaseService;
 import com.cm.venuebooking.service.venuesinfo.IVenuesInfoService;
+import com.cm.venuebooking.utils.MapLocationTransformUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.hazelcast.query.QueryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName: VenuesInfoServiceImpl
@@ -77,7 +80,9 @@ public class VenuesInfoServiceImpl extends BaseService implements IVenuesInfoSer
             setSaveInfo(params);
         }
         venuesInfoDao.saveVenuesInfo(params);
+        UserInfoBO userInfoBO = securityComponent.getCurrentUser();
         params.put("owId",UUIDUtil.getUUID());
+        params.put("userName",userInfoBO.getUserName());
         venuesInfoDao.saveVenueOwner(params);
 
     }
@@ -156,6 +161,23 @@ public class VenuesInfoServiceImpl extends BaseService implements IVenuesInfoSer
     }
 
     @Override
+    public List<ZTreeDTO> listVenuesInfoZTree() {
+        Map<String, Object> params = getHashMap(16);
+        setDataAuthorityInfo(params);
+        params.put("creator",securityComponent.getCurrentUser().getUserId());
+        List<VenuesInfoDTO> venuesInfoDTO = venuesInfoDao.listVenuesInfo(params);
+        List<ZTreeDTO> zTreeDTOs = new ArrayList<>();
+        for (VenuesInfoDTO item : venuesInfoDTO){
+            ZTreeDTO zTreeDTO = new ZTreeDTO();
+            zTreeDTO.setName(item.getVenueName());
+            zTreeDTO.setpId("0");
+            zTreeDTO.setId(item.getVenuesInfoId());
+            zTreeDTOs.add(zTreeDTO);
+        }
+        return zTreeDTOs;
+    }
+
+    @Override
     public SuccessResultList<List<VenuesInfoDTO>> listPageVenuesInfo(ListPage page) throws SearchException {
         setDataAuthorityInfo(page.getParams());
         page.getParams().put("creator",securityComponent.getCurrentUser().getUserId());
@@ -183,6 +205,13 @@ public class VenuesInfoServiceImpl extends BaseService implements IVenuesInfoSer
     @Override
     public SuccessResultData getVenuesDetailById(Map<String, Object> params) throws SearchException {
         VenuesInfoDTO venuesInfoDTO = venuesInfoDao.getVenuesInfoDetailForMiniApp(params);
+        Point point = new Point();
+        MapLocationTransformUtil util = new MapLocationTransformUtil();
+        point.setX(Double.parseDouble(venuesInfoDTO.getLatitude()));
+        point.setY(Double.parseDouble(venuesInfoDTO.getLongitude()));
+        point = util.map_bd2tx(point);
+        venuesInfoDTO.setLatitude(point.getX() + "");
+        venuesInfoDTO.setLongitude(point.getY() + "");
         return new SuccessResultData(venuesInfoDTO);
     }
 
@@ -213,6 +242,8 @@ public class VenuesInfoServiceImpl extends BaseService implements IVenuesInfoSer
         result.put("dayList",dayList);
         return result;
     }
+
+
 
     @Override
     public Object getCityInfoByName(Map<String, Object> param) throws SearchException {

@@ -252,6 +252,8 @@
             t1.booking_tips,
             t1.venue_service,
             t1.venues_info_id
+        ORDER BY
+            t1.gmt_create ASC
     </select>
 
     <!-- 小程序-根据项目分类查询场馆-->
@@ -282,9 +284,9 @@
 
     <insert id="saveVenueOwner" parameterType="map">
         INSERT INTO gen_venue_ow
-            (ow_id,venues_info_id,user_id)
+            (ow_id,venues_info_id,user_id,user_name)
         VALUES
-            (#{owId},#{venuesInfoId},#{creator})
+            (#{owId},#{venuesInfoId},#{creator},#{userName})
     </insert>
 
     <!-- 小程序-场馆详情信息-->

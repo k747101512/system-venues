@@ -4,6 +4,7 @@ import com.cm.common.exception.RemoveException;
 import com.cm.common.exception.SaveException;
 import com.cm.common.exception.SearchException;
 import com.cm.common.pojo.ListPage;
+import com.cm.common.pojo.dtos.ZTreeDTO;
 import com.cm.common.result.SuccessResult;
 import com.cm.common.result.SuccessResultData;
 import com.cm.common.result.SuccessResultList;
@@ -134,4 +135,10 @@ public interface IVenuesInfoService {
     Object getVenuesProjectDetailById(String token, Map<String, Object> params) throws SearchException;
 
     Object getCityInfoByName(Map<String, Object> param) throws SearchException;
+
+    /**
+     * 场馆zTree
+     * @return
+     */
+    List<ZTreeDTO> listVenuesInfoZTree();
 }

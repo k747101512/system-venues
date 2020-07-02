@@ -5,21 +5,102 @@
     <resultMap id="registerInfoMap" type="com.cm.venuebooking.pojo.dtos.register.RegisterInfoDTO">
         <id column="register_id" property="registerId"/>
         <result column="org_name" property="orgName"/>
-        <result column="user_name" property="userName"/>
+        <result column="register_name" property="registerName"/>
         <result column="cellphone" property="cellphone"/>
-        <result column="location" property="location"/>
         <result column="papers" property="papers"/>
         <result column="pass_type" property="passType"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_id" property="userId"/>
+        <result column="reason" property="reason"/>
     </resultMap>
 
-    <!-- 新增赛事信息 -->
+    <!-- 保存入驻信息 -->
     <insert id="saveRegisterInfo" parameterType="map">
         INSERT INTO gen_register_info (
-            register_id, org_name, user_name, cellphone, location, papers, pass_type
+            register_id,org_name,register_name,cellphone,papers,pass_type,user_id,reason,creator,gmt_create,modifier,gmt_modified,is_delete
         ) VALUES(
-            #{registerId}, #{orgName}, #{userName}, #{cellphone}, #{location}, #{papers}, #{passType}
+            #{registerId}, #{orgName}, #{registerName}, #{cellphone}, #{papers}, #{passType}, #{userId}, #{reason},
+            #{creator},#{gmtCreate},#{modifier},#{gmtModified},#{isDelete}
         )
     </insert>
 
+    <update id="updateRegisterInfo" parameterType="map">
+        UPDATE gen_register_info SET
+            <if test="orgName != null and orgName !=''">
+                org_name = #{orgName},
+            </if>
+            <if test="registerName != null and registerName !=''">
+                register_name = #{registerName},
+            </if>
+            <if test="cellphone != null and cellphone !=''">
+                cellphone = #{cellphone},
+            </if>
+            <if test="papers != null and papers !=''">
+                papers = #{papers},
+            </if>
+            <if test="passType != null and passType !=''">
+                pass_type = #{passType},
+            </if>
+            <if test="userId != null and userId !=''">
+                user_id = #{userId},
+            </if>
+            <if test="userName != null and userName !=''">
+                user_name = #{userName},
+            </if>
+            <if test="reason != null and reason !=''">
+                reason = #{reason},
+            </if>
+            modifier = #{modifier},
+            gmt_modified = #{gmtModified}
+        WHERE
+            register_id = #{registerId}
+    </update>
+
+    <select id="listPageVenuesRegister" parameterType="map" resultMap="registerInfoMap">
+        SELECT
+          t1.*
+        FROM
+          gen_register_info t1
+        WHERE
+          t1.is_delete = '0'
+        <if test="keywords !=null and keywords !=''">
+            AND (
+              t1.org_name LIKE CONCAT('%',CONCAT(#{keywords},'%'))
+              OR
+              t1.register_name LIKE CONCAT('%',CONCAT(#{keywords},'%'))
+              OR
+              t1.cellphone LIKE CONCAT('%',CONCAT(#{keywords},'%'))
+            )
+        </if>
+        ORDER BY
+          t1.gmt_create DESC,t1.pass_type ASC
+    </select>
+
+    <update id="removeRegister" parameterType="map">
+        UPDATE gen_register_info SET
+          is_delete = '1'
+        WHERE
+          register_id = #{registerId}
+    </update>
+
+    <select id="getRegisterInfo" parameterType="map" resultMap="registerInfoMap">
+        SELECT
+            t1.*
+        FROM
+            gen_register_info t1
+        WHERE
+            t1.is_delete = '0'
+        <if test="registerId !=null and registerId !=''">
+              AND t1.register_id = #{registerId}
+        </if>
+        <if test="creator != null and creator !=''">
+            AND t1.creator = #{creator}
+        </if>
+        LIMIT 1
+    </select>
+
+    <select id="listVenueOw" parameterType="map" resultType="map">
+        SELECT user_id,user_name FROM gen_venue_ow
+    </select>
 
 </mapper>

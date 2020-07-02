@@ -18,7 +18,7 @@
                 <div class="layui-card-body">
                     <div class="test-table-reload-btn" style="margin-bottom: 10px;">
                         <div class="layui-inline">
-                            <input type="text" id="keywords" class="layui-input search-item" autocomplete="off" placeholder="输入关键字">
+                            <input type="text" id="keywords" class="layui-input search-item" autocomplete="off" placeholder="流水号|场馆|项目">
                         </div>
                         <button type="button" id="search" class="layui-btn layui-btn-sm">
                             <i class="fa fa-lg fa-search"></i> 搜索
@@ -26,7 +26,7 @@
                     </div>
                     <table class="layui-hide" id="dataTable" lay-filter="dataTable"></table>
                     <!-- 表头按钮组 -->
-                    <script type="text/html" id="headerToolBar">
+                    <!--<script type="text/html" id="headerToolBar">
                         <div class="layui-btn-group">
                             <button type="button" class="layui-btn layui-btn-sm" lay-event="saveEvent">
                                 <i class="fa fa-lg fa-plus"></i> 新增场地
@@ -38,7 +38,7 @@
                                 <i class="fa fa-lg fa-trash"></i> 删除
                             </button>
                         </div>
-                    </script>
+                    </script>-->
                 </div>
             </div>
         </div>
@@ -76,40 +76,46 @@
                 cols: [[
                     {type:'checkbox', fixed: 'left'},
                     {field:'rowNum', width:80, title: '序号', fixed: 'left', align:'center', templet: '<span>{{d.LAY_INDEX}}</span>'},
-                    {field: 'bookingOrderDate', width: 150, title: '日期', align:'center',
+                    {field: 'bookingBaseInfo', width: 300, title: '预定信息', align:'center',
+                        templet: function(row) {
+                            var venuesName = row['venuesName'];
+                            var projectName = row['projectName'];
+                            var groundName = row['groundName'];
+                            return venuesName + '-' + projectName + '-' + groundName;
+                        }
+                    },
+                    {field: 'bookingDate', width: 200, title: '预订日期', align:'center',
+                        templet: function(row) {
+                            var bookingOrderDate = row['bookingOrderDate'];
+                            return bookingOrderDate;
+                        }
+                    },
+                    {width: 200, title: '时段', align:'center',
+                        templet: function(row) {
+                            var timeStr = row['timeStr'];
+                            var timeEnd = row['timeEnd'];
+                            return timeStr + ' 至 ' +timeEnd;
+                        }
+                    },
+                    {field: 'price', width: 100, title: '价格', align:'center',
                         templet: function(row) {
                             var rowData = row[this.field];
-                            if(typeof(rowData) === 'undefined' || rowData == null || rowData === '') {
-                                return '-';
-                            }
+                            return rowData == '0' ? '免费' : rowData + '元';
+                        }
+                    },
+                    {field: 'nickName', width: 200, title: '预订人', align:'center',
+                        templet: function(row) {
+                            var rowData = row[this.field];
                             return rowData;
                         }
                     },
-                    {field: 'userName', width: 200, title: '预订人', align:'center',
-                        templet: function(row) {
-                            var rowData = row[this.field];
-                            if(typeof(rowData) === 'undefined' || rowData == null || rowData === '') {
-                                return '-';
-                            }
-                            return rowData;
-                        }
-                    },
-                    {field: 'phoneNumber', width: 150, title: '联系方式', align:'center',
-                        templet: function(row) {
-                            var rowData = row[this.field];
-                            if(typeof(rowData) === 'undefined' || rowData == null || rowData === '') {
-                                return '-';
-                            }
-                            return rowData;
-                        }
-                    },
-                    {width: 250, title: '操作', align:'center',
+                    /*{width: 250, title: '操作', align:'center',
                         templet: function(row) {
                             return '<a class="layui-btn layui-btn-xs" lay-event="arrive">已到场</a>' +
                                 '<a class="layui-btn layui-btn-xs" lay-event="consult">已协商</a>' +
                                 '<a class="layui-btn layui-btn-xs" lay-event="blackList">拉黑</a>'
                         }
-                    },
+                    },*/
                 ]],
                 page: true,
                 parseData: function(data) {
@@ -234,9 +240,7 @@
             table.reload('dataTable', {
                 url: top.restAjax.path(tableUrl, []),
                 where: {
-                    keywords: $('#keywords').val(),
-                    venuesProjectId: venuesProjectId,
-                    endTime: $('#endTime').val()
+                    keywords: $('#keywords').val()
                 },
                 page: {
                     curr: currentPage

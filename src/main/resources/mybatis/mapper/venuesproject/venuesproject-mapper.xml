@@ -173,10 +173,23 @@
         LEFT JOIN data_dictionary t4 ON FIND_IN_SET(t4.dictionary_id,t1.facilities)
         WHERE
             t1.is_delete = 0
-        AND t1.creator = #{creator}
-            <if test="keywords != null and keywords != ''">
-                <!-- 这里添加检索关键字 -->
+        <if test="venuesInfoId != null and venuesInfoId != ''">
+            AND t1.venue_id = #{venuesInfoId}
+        </if>
+        <if test="data_authority != null and data_authority != ''">
+            <if test="data_authority == 'self' ">
+                AND t1.creator = #{creator}
             </if>
+            <if test="data_authority != 'self'">
+                AND t1.creator IN
+                <foreach collection="data_creators" open="(" close=")" separator="," index="index">
+                    #{data_creators[${index}]}
+                </foreach>
+            </if>
+        </if>
+        <if test="keywords != null and keywords != ''">
+            <!-- 这里添加检索关键字 -->
+        </if>
         GROUP BY
             t1.venue_id,
             t1.project_category,

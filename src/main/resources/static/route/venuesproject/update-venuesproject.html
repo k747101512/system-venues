@@ -22,18 +22,6 @@
         <div class="layui-card-body" style="padding: 15px;">
             <form class="layui-form layui-form-pane" lay-filter="dataForm">
                 <div class="layui-form-item">
-                    <label class="layui-form-label">选择场馆</label>
-                    <div class="layui-input-block layui-form" id="venueSelectTemplateBox" lay-filter="venueSelectTemplateBox"></div>
-                    <script id="venueSelectTemplate" type="text/html">
-                        <select id="venueId" name="venueId" lay-verify="required">
-                            <option value="">请选择</option>
-                            {{# for(var i = 0, item; item = d[i++];) { }}
-                            <option value="{{item.venuesInfoId}}">{{item.venueName}}</option>
-                            {{# } }}
-                        </select>
-                    </script>
-                </div>
-                <div class="layui-form-item">
                     <label class="layui-form-label">项目类别</label>
                     <div class="layui-input-block layui-form" id="projectSelectTemplateBox" lay-filter="projectSelectTemplateBox"></div>
                     <script id="projectSelectTemplate" type="text/html">
@@ -72,7 +60,6 @@
         </div>
     </div>
 </div>
-<script src="assets/js/vendor/wangEditor/wangEditor.min.js"></script>
 <script src="assets/layuiadmin/layui/layui.js"></script>
 <script>
     layui.config({
@@ -95,7 +82,6 @@
                 }
                 form.val('dataForm', dataFormData);
                 form.render(null, 'dataForm');
-                initVenuesInfoSelect(data['venueId']);
                 initProjectSelect(data['projectCategory']);
                 initFacilitiesCheckbox(data['facilities']);
             }, function(code, data) {
@@ -107,21 +93,6 @@
             });
         }
         initData();
-
-        // 初始化场馆列表
-        function initVenuesInfoSelect(selectValue) {
-            top.restAjax.get(top.restAjax.path('api/venuesinfo/listvenuesinfo', []), {}, null, function(code, data, args) {
-                laytpl(document.getElementById('venueSelectTemplate').innerHTML).render(data, function(html) {
-                    document.getElementById('venueSelectTemplateBox').innerHTML = html;
-                });
-                form.render('select', 'venueSelectTemplateBox');
-                var selectObj = {};
-                selectObj['venueId'] = selectValue;
-                form.val('dataForm', selectObj);
-            }, function(code, data) {
-                top.dialog.msg(data.msg);
-            });
-        }
 
         // 初始化项目类别
         function initProjectSelect(selectValue) {

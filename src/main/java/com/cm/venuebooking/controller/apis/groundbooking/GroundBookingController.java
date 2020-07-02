@@ -32,7 +32,7 @@ public class GroundBookingController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "当前页码", paramType = "form", dataType = "Integer", defaultValue = "1"),
             @ApiImplicitParam(name = "rows", value = "显示数量", paramType = "form", dataType = "Integer", defaultValue = "20"),
-            @ApiImplicitParam(name = "keywords", value = "检索条件", paramType = "form", dataType = "String")
+            @ApiImplicitParam(name = "keywords", value = "流水号|手机号|微信名", paramType = "form", dataType = "String")
     })
     @ApiResponses({@ApiResponse(code = 400, message = "请求失败", response = ErrorResult.class)})
     @GetMapping("listpagebookingorder")

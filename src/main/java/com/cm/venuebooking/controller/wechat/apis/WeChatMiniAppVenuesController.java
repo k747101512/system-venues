@@ -1,14 +1,18 @@
 package com.cm.venuebooking.controller.wechat.apis;
 
-import com.alibaba.fastjson.JSONObject;
+import com.cm.common.annotation.CheckRequestBodyAnnotation;
 import com.cm.common.base.AbstractController;
 import com.cm.common.constants.ISystemConstant;
 import com.cm.common.exception.SearchException;
 import com.cm.common.plugin.pojo.dtos.datadictionary.DataDictionaryDTO;
 import com.cm.common.plugin.service.datadictionary.IDataDictionaryService;
+import com.cm.common.pojo.ListPage;
 import com.cm.common.result.ErrorResult;
 import com.cm.common.result.SuccessResult;
 import com.cm.common.result.SuccessResultData;
+import com.cm.common.result.SuccessResultList;
+import com.cm.venuebooking.pojo.dtos.bookingorder.MyTicketListDTO;
+import com.cm.venuebooking.pojo.vos.groundbooking.GroundTicketVO;
 import com.cm.venuebooking.service.groundbooking.IGroundBookingService;
 import com.cm.venuebooking.service.groundinfo.IGroundInfoService;
 import com.cm.venuebooking.service.venuesinfo.IVenuesInfoService;
@@ -43,6 +47,9 @@ public class WeChatMiniAppVenuesController extends AbstractController {
 
     @Autowired
     private IDataDictionaryService dataDictionaryService;
+
+    @Autowired
+    private IGroundBookingService groundBookingService;
 
     @ApiOperation(value = "场馆项目表列表", notes = "场馆项目表列表接口")
     @ApiImplicitParams({
@@ -120,7 +127,7 @@ public class WeChatMiniAppVenuesController extends AbstractController {
 
     @ApiOperation(value = "场馆详情", notes = "场馆详情接口")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "venuesInfoId", value = "venuesInfoId", paramType = "header")
+            @ApiImplicitParam(name = "venuesInfoId", value = "venuesInfoId")
     })
     @ApiResponses({@ApiResponse(code = 400, message = "请求失败", response = ErrorResult.class)})
     @GetMapping("getvenuesdetailbyId")
@@ -131,7 +138,7 @@ public class WeChatMiniAppVenuesController extends AbstractController {
 
     @ApiOperation(value = "场馆项目列表及是否可预订", notes = "场馆项目列表及是否可预订接口")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "venuesInfoId", value = "venuesInfoId", paramType = "header")
+            @ApiImplicitParam(name = "venuesInfoId", value = "venuesInfoId")
     })
     @ApiResponses({@ApiResponse(code = 400, message = "请求失败", response = ErrorResult.class)})
     @GetMapping("listvenueproject")
@@ -142,38 +149,38 @@ public class WeChatMiniAppVenuesController extends AbstractController {
 
     @ApiOperation(value = "查询场地和场次列表", notes = "查询场地和场次接口")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", paramType = "header"),
             @ApiImplicitParam(name = "venuesProjectId", value = "venuesProjectId")
     })
     @ApiResponses({@ApiResponse(code = 400, message = "请求失败", response = ErrorResult.class)})
-    @GetMapping("listgrouninfoanditem")
+    @GetMapping("listgroundinfoanditem")
     public SuccessResultData listGroundInfoAndItem() throws SearchException {
         Map<String, Object> params = requestParams();
         return groundInfoService.listGroundInfoMiniApp(params);
     }
 
-    @ApiOperation(value = "小程序-查询场次预订列表", notes = "小程序-查询场次预订列表接口")
+    @ApiOperation(value = "保存预订订单", notes = "保存预定订单接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", paramType = "header"),
-            @ApiImplicitParam(name = "queryDate", value = "queryDate", paramType = "query")
     })
-    @ApiResponses({@ApiResponse(code = 400, message = "请求失败", response = ErrorResult.class)})
-    @PostMapping("savebookingitems")
-    public SuccessResult saveBookingItems(@RequestHeader("token") String token, @RequestBody JSONObject jsonObject) throws Exception {
-        //bookingService.saveBookingItems(token,jsonObject);
-        return new SuccessResult();
+    @PostMapping("savebookinginfo")
+    @CheckRequestBodyAnnotation
+    public SuccessResult saveBookingInfo(@RequestHeader("token") String token,
+                                         @RequestBody GroundTicketVO groundTicketVO) throws Exception {
+        return groundBookingService.saveBookingInfoForApp(token,groundTicketVO);
     }
 
-    @ApiOperation(value = "小程序-查询我的预订列表", notes = "小程序-查询我的预订列表接口")
+    @ApiOperation(value = "我的订单列表", notes = "我的订单列表接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", paramType = "header"),
-            @ApiImplicitParam(name = "queryDate", value = "queryDate", paramType = "query")
+            @ApiImplicitParam(name = "page", value = "当前页码", paramType = "form", dataType = "Integer", defaultValue = "1"),
+            @ApiImplicitParam(name = "rows", value = "显示数量", paramType = "form", dataType = "Integer", defaultValue = "20")
     })
     @ApiResponses({@ApiResponse(code = 400, message = "请求失败", response = ErrorResult.class)})
-    @GetMapping("listmybookingorder")
-    public SuccessResultData listMyBookingOrder(@RequestHeader("token") String token) throws Exception {
-        //return bookingService.listMyBookingOrder(token);
-        return null;
+    @GetMapping("listpagemyticket")
+    public SuccessResultList<List<MyTicketListDTO>> listPageMyTicket(@RequestHeader("token") String token, ListPage page) throws SearchException {
+        Map<String, Object> params = requestParams();
+        page.setParams(params);
+        return groundBookingService.listPageMyTicket(token,page);
     }
 
 }

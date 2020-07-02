@@ -2,7 +2,10 @@ package com.cm.venuebooking.service.venuearticle;
 
 import com.cm.common.article.pojo.dtos.articlecontent.ArticleContentDTO;
 import com.cm.common.exception.SearchException;
+import com.cm.common.pojo.ListPage;
+import com.cm.common.pojo.dtos.ZTreeDTO;
 import com.cm.common.result.SuccessResult;
+import com.cm.common.result.SuccessResultList;
 import com.cm.venuebooking.pojo.dtos.venuearticle.VenueArticleDTO;
 import com.cm.venuebooking.pojo.vos.venuearticle.VenueArticleVO;
 
@@ -44,8 +47,14 @@ public interface IVenueArticleService {
 
     /**
      * 根据分类查询新闻类表
-     * @param param
+     * @param page
      * @return
      */
-    List<VenueArticleDTO> listVenueArticle(Map<String, Object> param);
+    SuccessResultList<List<VenueArticleDTO>> listPageArticleByCategory(ListPage page);
+
+    /**
+     * 文章类型zTree列表
+     * @return
+     */
+    List<ZTreeDTO> listVenueArticleZTree();
 }

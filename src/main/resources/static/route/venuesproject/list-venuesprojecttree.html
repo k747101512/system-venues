@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <base href="/venuebooking/">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="assets/fonts/font-awesome/css/font-awesome.css"/>
+    <link rel="stylesheet" href="assets/layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="assets/layuiadmin/style/admin.css" media="all">
+    <link rel="stylesheet" href="assets/js/vendor/zTree3/css/metroStyle/metroStyle.css"/>
+    <link rel="stylesheet" href="assets/layuiadmin/style/common.css" media="all">
+</head>
+<body>
+<div class="layui-fluid layui-anim layui-anim-fadein">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md2">
+            <div class="layui-card">
+                <div class="layui-card-body left-tree-wrap">
+                    <div id="leftTreeWrap">
+                        <ul id="leftTree" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md10">
+            <div class="layui-card">
+                <div id="listContentWrap" class="layui-card-body">
+                    <iframe id="listContent" frameborder="0" class="layadmin-iframe"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="assets/layuiadmin/layui/layui.js"></script>
+<script>
+    var common;
+    layui.config({
+        base: 'assets/layuiadmin/'
+    }).extend({
+        index: 'lib/index'
+    }).use(['index', 'ztree', 'common'], function() {
+        common = layui.common;
+        var $ = layui.$;
+        var $win = $(window);
+        var resizeTimeout = null;
+        var parentId = '';
+        var venueName = '';
+
+        // 初始化IFrame
+        function initIFrame() {
+            $('#listContent').attr('src', top.restAjax.path('route/venuesproject/list-venuesproject.html?venuesInfoId={parentId}&venueName={venueName}',
+                [parentId,venueName]));
+        }
+
+        // 初始化大小
+        function initSize() {
+            $('#leftTreeWrap').css({
+                height: $win.height() - 30,
+                overflow: 'auto'
+            });
+            $('#listContentWrap').css({
+                height: $win.height() - 50,
+            });
+        }
+        // 初始化树
+        function initThree() {
+            var setting = {
+                async: {
+                    enable: true,
+                    autoLoad: false,
+                    type: 'get',
+                    url: top.restAjax.path('api/venuesinfo/listvenuesinfoztree', []),
+                    autoParam: ['id'],
+                    otherParam: {},
+                    dataFilter: function (treeId, parentNode, childNodes) {
+                        if (!childNodes) return null;
+                        for (var i = 0, l = childNodes.length; i < l; i++) {
+                            childNodes[i].name = childNodes[i].name.replace(/\.n/g, '.');
+                        }
+                        return childNodes;
+                    }
+                },
+                callback: {
+                    onClick: function (event, treeId, treeNode) {
+                        parentId = treeNode.id;
+                        venueName = treeNode.name;
+                        initIFrame();
+                        return false;
+                    }
+                },
+            };
+            var zTree = $.fn.zTree.init($("#leftTree"), setting);
+            zTree.addNodes(null, {
+                id: '0',
+                pId: '-1',
+                name: '选择场馆',
+                url: 'javascript:;',
+                isParent: 'true'
+            });
+            common.refreshTree('leftTree');
+        }
+        initSize();
+        initIFrame();
+        initThree();
+
+        // 事件 - 页面变化
+        $win.on('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                initSize();
+            }, 500);
+        });
+    });
+</script>
+</body>
+</html>

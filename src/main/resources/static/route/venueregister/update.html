@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <base href="/venuebooking/">
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="assets/fonts/font-awesome/css/font-awesome.css"/>
+    <link rel="stylesheet" href="assets/layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="assets/layuiadmin/style/admin.css" media="all">
+    <link rel="stylesheet" href="assets/js/vendor/viewer/viewer.min.css">
+</head>
+<body>
+<div class="layui-fluid layui-anim layui-anim-fadein">
+    <div class="layui-card">
+        <div class="layui-card-header">
+            <span class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+              <a class="close" href="javascript:void(0);">上级列表</a><span lay-separator="">/</span>
+              <a href="javascript:void(0);"><cite>新增内容</cite></a>
+            </span>
+        </div>
+        <div class="layui-card-body" style="padding: 15px;">
+            <form class="layui-form layui-form-pane" lay-filter="dataForm">
+                <input type="hidden" id="registerId" name="registerId" value="">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">入驻名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="orgName" name="orgName" class="layui-input" value="" readonly="readonly">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">负责人</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="registerName" name="registerName" class="layui-input" value="" readonly="readonly">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">联系电话</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="cellphone" name="cellphone" class="layui-input" value="" readonly="readonly">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">相关文件</label>
+                    <div class="layui-input-block">
+                        <input type="hidden" id="papers" name="papers">
+                        <div class="layui-btn-container" id="papersFileBox" style="border: 1px solid #e6e6e6;"></div>
+                        <script id="papersFileDownload" type="text/html">
+                            {{# var fileName = 'papers'; }}
+                            {{# if(d[fileName].length > 0) { }}
+                            {{#    var files = d[fileName];}}
+                            {{#    for(var i = 0, item = files[i]; item = files[i++];) { }}
+                            <div class="upload-image-box">
+                                <span class="upload-image-span">
+                                    <img src="route/file/downloadfile/false/{{item.fileId}}" align="加载失败">
+                                </span>
+                            </div>
+                            {{#    } }}
+                            {{# } }}
+                        </script>
+                    </div>
+                </div>
+                <div class="layui-col-md6">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">关联账号</label>
+                        <input type="hidden" id="userName" name="userName" value="">
+                        <div class="layui-input-block layui-form" id="unBindUserTemplateBox" lay-filter="unBindUserTemplateBox"></div>
+                        <script id="unBindUserTemplate" type="text/html">
+                            <select id="userId" name="userId" lay-search lay-filter="userId">
+                                <option value="">支持汉字检索</option>
+                                {{# for(var i = 0, item; item = d[i++];) { }}
+                                <option value="{{item.userId}}" username="{{item.loginName}}">{{item.name}}</option>
+                                {{# } }}
+                            </select>
+                        </script>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">审核意见</label>
+                    <div class="layui-input-block">
+                        <textarea id="reason" name="reason" placeholder="如需补充或修改内容请进行简单描述" class="layui-textarea"></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-layout-admin">
+                    <div class="layui-input-block">
+                        <div class="layui-footer" style="left: 0;">
+                            <button type="button" class="layui-btn" lay-submit lay-filter="passForm">保存</button>
+                            <button type="button" id="unPass-btn" class="layui-btn layui-btn-primary" lay-submit lay-filter="unPassForm">不通过</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="assets/js/vendor/viewer/viewer.min.js"></script>
+<script src="assets/layuiadmin/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: 'assets/layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'form', 'laytpl'], function(){
+        var $ = layui.$;
+        var form = layui.form;
+        var laytpl = layui.laytpl;
+        var laydate = layui.laydate;
+        var viewerObj = {};
+        var registerId = top.restAjax.params(window.location.href).registerId;
+
+        function initData(){
+            var loadLayerIndex;
+            top.restAjax.get(top.restAjax.path('api/register/getregisterinfo/{id}',[registerId]), {}, null, function(code, data) {
+                var dataFormData = {};
+                for(var i in data) {
+                    dataFormData[i] = data[i];
+                }
+                form.val('dataForm', dataFormData);
+                form.render(null, 'dataForm');
+                initPapersUploadFile();
+                initUnBindUser(data['userId']);
+                if(data['passType'] == '1'){
+                    $('#unPass-btn').remove();
+                }
+            },function(code, data) {
+                top.DialogBox.msg(data.msg);
+            }, function() {
+                loadLayerIndex = top.dialog.msg(top.dataMessage.loading, {icon: 16, time: 0, shade: 0.3});
+                top.dialog.close(loadLayerIndex);
+            });
+        }
+        initData();
+
+        // 初始化封面图上传
+        function initPapersUploadFile() {
+            var files = $('#papers').val();
+            initFileList('papers', files, function(fileName) {
+                var viewer = new Viewer(document.getElementById(fileName +'FileBox'), {navbar: false});
+                viewerObj[fileName] = viewer;
+            });
+        }
+
+        // 初始化文件列表
+        function initFileList(fileName, ids, callback) {
+            var dataForm = {};
+            dataForm[fileName] = ids;
+            form.val('dataForm', dataForm);
+            if(!ids) {
+                refreshDownloadTemplet(fileName, []);
+                if(callback) {
+                    callback(fileName, []);
+                }
+                return;
+            }
+            top.restAjax.get(top.restAjax.path('api/file/listfilebyfileid', []), {
+                ids: ids
+            }, null, function(code, data) {
+                refreshDownloadTemplet(fileName, data);
+                if(callback) {
+                    callback(fileName, data);
+                }
+            }, function(code, data) {
+                top.dialog.msg(data.msg);
+            });
+        }
+
+        function refreshDownloadTemplet(fileName, file) {
+            var dataRander = {};
+            dataRander[fileName] = file;
+            laytpl(document.getElementById(fileName +'FileDownload').innerHTML).render(dataRander, function(html) {
+                document.getElementById(fileName +'FileBox').innerHTML = html;
+            });
+        }
+
+        function initUnBindUser(selectValue) {
+            top.restAjax.get(top.restAjax.path('api/register/getunbindregisteruser', []), {}, null, function(code, data) {
+                laytpl(document.getElementById('unBindUserTemplate').innerHTML).render(data.data, function(html) {
+                    document.getElementById('unBindUserTemplateBox').innerHTML = html;
+                });
+                form.render('select', 'unBindUserTemplateBox');
+                var selectObj = {};
+                selectObj['userId'] = selectValue;
+                form.val('dataForm', selectObj);
+                var userName = $('#userId').find('option:selected').attr('username');
+                $('#userName').val(userName);
+            }, function(code, data) {
+                top.dialog.msg(data.msg);
+            });
+        }
+
+        form.on('select(userId)', function(data){
+            var userName = $(data.elem).find('option:selected').attr('username');
+            $('#userName').val(userName);
+        });
+
+        form.on('submit(passForm)', function(formData){
+            formData.field['passType'] = '1';
+            updateRegisterInfo(formData);
+        });
+
+        form.on('submit(unPassForm)', function(formData){
+            formData.field['passType'] = '2';
+            updateRegisterInfo(formData);
+        });
+
+        function updateRegisterInfo(formData) {
+            var passType = formData.field['passType'];
+            if(passType == '1' && $('#userId').val() == ''){
+                layer.msg('请选择关联账号', {icon: 5});
+                return;
+            }
+            if(passType == '2'){
+                $('#userId').val('');
+                $('#userName').val('');
+            }
+            top.dialog.confirm(top.dataMessage.commit, function (index) {
+                top.dialog.close(index);
+                var loadLayerIndex;
+                top.restAjax.post(top.restAjax.path('api/register/updateregisterinfo', []), formData.field, null, function (code, data) {
+                    closeBox();
+                }, function (code, data) {
+                    top.dialog.msg(data.msg);
+                }, function () {
+                    loadLayerIndex = top.dialog.msg(top.dataMessage.committing, {icon: 16, time: 0, shade: 0.3});
+                }, function () {
+                    top.dialog.close(loadLayerIndex);
+                });
+            });
+            return false;
+        }
+
+        $('.close').on('click', function() {
+            closeBox();
+        });
+
+        //关闭页面-返回上级
+        function closeBox() {
+            parent.layer.close(parent.layer.getFrameIndex(window.name));
+        }
+
+        // 校验
+        form.verify({
+        });
+    });
+</script>
+</body>
+</html>

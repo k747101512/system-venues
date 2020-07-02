@@ -27,13 +27,6 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">场地位置</label>
-                    <div class="layui-input-block">
-                        <input id="groundLocation" name="groundLocation" class="layui-input" placeholder="请描述场地所在具体位置">
-                    </div>
-                </div>
-
-                <div class="layui-form-item">
                     <a class="layui-btn layui-btn-sm add-item"><i class="layui-icon"></i> + 添加场次</a>
                 </div>
                 <!--模板容器-->
@@ -127,7 +120,6 @@
         initItemTemplateBox();
 
         $(document).on('click','a.add-item',function(){
-            layer.msg(1);
             var param = {
                 timeStr : '',
                 timeEnd : '',

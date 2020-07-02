@@ -20,6 +20,12 @@
         <result column="summary_join_by_article_category_id" property="summaryJoinByArticleCategoryId"/>
     </resultMap>
 
+    <resultMap id="venueArticleCategoryDTO" type="com.cm.venuebooking.pojo.dtos.venuearticle.VenueArticleCategoryDTO">
+        <id column="article_category_id" property="articleCategoryId"/>
+        <result column="title" property="title"/>
+        <result column="summary" property="summary"/>
+    </resultMap>
+
     <!-- 新增文章内容 -->
     <insert id="save" parameterType="map">
         INSERT INTO article_content(
@@ -62,6 +68,10 @@
             #{isDelete}
         )
     </insert>
+
+    <select id="listVenueArticleCategory" resultMap="venueArticleCategoryDTO">
+        SELECT * FROM article_category WHERE is_delete = 0
+    </select>
 
     <!-- 修改文章内容 -->
     <update id="update" parameterType="map">
@@ -155,7 +165,7 @@
         AND
             t1.article_category_id = #{articleCategoryId}
         ORDER BY
-            t1.gmt_modified DESC
+            t1.publish_date DESC
     </select>
 
 </mapper>

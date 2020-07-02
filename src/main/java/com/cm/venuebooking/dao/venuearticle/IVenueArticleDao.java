@@ -1,6 +1,7 @@
 package com.cm.venuebooking.dao.venuearticle;
 
 import com.cm.common.exception.SearchException;
+import com.cm.venuebooking.pojo.dtos.venuearticle.VenueArticleCategoryDTO;
 import com.cm.venuebooking.pojo.dtos.venuearticle.VenueArticleDTO;
 import org.springframework.stereotype.Repository;
 
@@ -44,4 +45,11 @@ public interface IVenueArticleDao {
      * @return
      */
     List<VenueArticleDTO> listVenueArticle(Map<String, Object> param);
+
+
+    /**
+     * 文章类型列表
+     * @return
+     */
+    List<VenueArticleCategoryDTO> listVenueArticleCategory();
 }

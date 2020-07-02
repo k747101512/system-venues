@@ -13,8 +13,10 @@ public class GroundItemDTO {
 
     @ApiModelProperty(name = "groundItemId", value = "主键")
     private String groundItemId;
-    @ApiModelProperty(name = "groundInfoId", value = "场地主键")
+    @ApiModelProperty(name = "groundInfoId", value = "场地")
     private String groundInfoId;
+    @ApiModelProperty(name = "groundName", value = "场地名")
+    private String groundName;
     @ApiModelProperty(name = "timeStr", value = "开始时间")
     private String timeStr;
     @ApiModelProperty(name = "timeEnd", value = "结束时间")
@@ -62,6 +64,14 @@ public class GroundItemDTO {
         this.price = price;
     }
 
+    public String getGroundName() {
+        return groundName == null ? "" : groundName;
+    }
+
+    public void setGroundName(String groundName) {
+        this.groundName = groundName;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
@@ -69,6 +79,8 @@ public class GroundItemDTO {
                 .append(groundItemId).append('\"');
         sb.append(",\"groundInfoId\":\"")
                 .append(groundInfoId).append('\"');
+        sb.append(",\"groundName\":\"")
+                .append(groundName).append('\"');
         sb.append(",\"timeStr\":\"")
                 .append(timeStr).append('\"');
         sb.append(",\"timeEnd\":\"")

@@ -20,6 +20,8 @@ public class VenuesInfoOwDTO {
     private String venuesInfoId;
     @ApiModelProperty(name = "userId", value = "管理人Id")
     private String userId;
+    @ApiModelProperty(name = "userName", value = "管理人姓名")
+    private String userName;
 
     public String getOwId() {
         return owId == null ? "" : owId;
@@ -45,6 +47,14 @@ public class VenuesInfoOwDTO {
         this.userId = userId;
     }
 
+    public String getUserName() {
+        return userName == null ? "" : userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
@@ -54,6 +64,8 @@ public class VenuesInfoOwDTO {
                 .append(venuesInfoId).append('\"');
         sb.append(",\"userId\":\"")
                 .append(userId).append('\"');
+        sb.append(",\"userName\":\"")
+                .append(userName).append('\"');
         sb.append('}');
         return sb.toString();
     }

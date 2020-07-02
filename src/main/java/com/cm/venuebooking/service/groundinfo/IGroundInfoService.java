@@ -7,6 +7,7 @@ import com.cm.common.result.SuccessResult;
 import com.cm.common.result.SuccessResultData;
 import com.cm.common.result.SuccessResultList;
 import com.cm.venuebooking.pojo.dtos.groundinfo.GroundInfoDTO;
+import com.cm.venuebooking.pojo.dtos.groundinfo.GroundItemDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -74,4 +75,18 @@ public interface IGroundInfoService {
      * @return
      */
     SuccessResultData listGroundInfoMiniApp(Map<String, Object> params);
+
+    /**
+     * 查询场次时刻(单条)
+     * @param groundItemId
+     * @return
+     */
+    GroundItemDTO getGroundItem(String groundItemId);
+
+    /**
+     * 查询场地信息(byId)
+     * @param groundInfoId
+     * @return
+     */
+    GroundInfoDTO getGroundInfoById(String groundInfoId);
 }

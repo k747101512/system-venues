@@ -17,6 +17,7 @@
         <result column="time_str" property="timeStr"/>
         <result column="time_end" property="timeEnd"/>
         <result column="price" property="price"/>
+        <result column="ground_name" property="groundName"/>
     </resultMap>
 
     <insert id="saveGroundInfo" parameterType="map">
@@ -133,6 +134,21 @@
             </foreach>
     </update>
 
+    <select id="getGroundItem" parameterType="map" resultMap="groundItemDTO">
+        SELECT
+            t1.ground_item_id,
+            t1.ground_info_id,
+            t1.time_str,
+            t1.time_end,
+            t1.price,
+            t2.ground_name
+        FROM
+            gen_ground_item t1
+        LEFT JOIN gen_ground_info t2 ON t2.ground_info_id = t1.ground_info_id
+        WHERE
+            t1.ground_item_id = #{groundItemId}
+    </select>
+
     <select id="listGroundInfo" parameterType="map" resultMap="groundInfoDTO">
         SELECT
             t1.ground_info_id,
@@ -145,6 +161,9 @@
             gen_ground_info t1
         WHERE
             t1.is_delete = 0
+        <if test="open != null and open !=''">
+        AND t1.open_close_type = 'open'
+        </if>
         AND t1.venues_project_id = #{venuesProjectId}
         ORDER BY t1.gmt_create ASC
     </select>

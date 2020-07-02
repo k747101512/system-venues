@@ -2,17 +2,25 @@ package com.cm.venuebooking.service.venuearticle.impl;
 
 import com.cm.common.article.pojo.dtos.articlecontent.ArticleContentDTO;
 import com.cm.common.exception.SearchException;
+import com.cm.common.pojo.ListPage;
+import com.cm.common.pojo.dtos.ZTreeDTO;
 import com.cm.common.result.SuccessResult;
+import com.cm.common.result.SuccessResultList;
 import com.cm.common.utils.HashMapUtil;
 import com.cm.common.utils.UUIDUtil;
 import com.cm.venuebooking.dao.venuearticle.IVenueArticleDao;
+import com.cm.venuebooking.pojo.dtos.venuearticle.VenueArticleCategoryDTO;
 import com.cm.venuebooking.pojo.dtos.venuearticle.VenueArticleDTO;
+import com.cm.venuebooking.pojo.dtos.venuedictionary.VenueDictionaryDTO;
 import com.cm.venuebooking.pojo.vos.venuearticle.VenueArticleVO;
 import com.cm.venuebooking.service.BaseService;
 import com.cm.venuebooking.service.venuearticle.IVenueArticleService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,8 +62,24 @@ public class VenueArticleServiceImpl extends BaseService implements IVenueArticl
     }
 
     @Override
-    public List<VenueArticleDTO> listVenueArticle(Map<String, Object> param) {
-        //articleCategoryId
-        return venueArticleDao.listVenueArticle(param);
+    public SuccessResultList listPageArticleByCategory(ListPage page) {
+        PageHelper.startPage(page.getPage(), page.getRows());
+        List<VenueArticleDTO> list = venueArticleDao.listVenueArticle(page.getParams());
+        PageInfo<VenueArticleDTO> pageInfo = new PageInfo<>(list);
+        return new SuccessResultList(list,pageInfo.getPages(),pageInfo.getTotal());
+    }
+
+    @Override
+    public List<ZTreeDTO> listVenueArticleZTree() {
+        List<VenueArticleCategoryDTO> categoryList = venueArticleDao.listVenueArticleCategory();
+        List<ZTreeDTO> zTreeDTOs = new ArrayList<>();
+        for (VenueArticleCategoryDTO item : categoryList){
+            ZTreeDTO zTreeDTO = new ZTreeDTO();
+            zTreeDTO.setName(item.getTitle());
+            zTreeDTO.setpId("0");
+            zTreeDTO.setId(item.getArticleCategoryId());
+            zTreeDTOs.add(zTreeDTO);
+        }
+        return zTreeDTOs;
     }
 }

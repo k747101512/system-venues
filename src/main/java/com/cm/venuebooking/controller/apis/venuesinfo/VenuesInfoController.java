@@ -9,6 +9,7 @@ import com.cm.common.exception.SearchException;
 import com.cm.common.plugin.service.datadictionary.IDataDictionaryService;
 import com.cm.common.pojo.ListPage;
 import com.cm.common.pojo.dtos.CurrentUserIdInfoDTO;
+import com.cm.common.pojo.dtos.ZTreeDTO;
 import com.cm.common.result.ErrorResult;
 import com.cm.common.result.SuccessResult;
 import com.cm.common.result.SuccessResultList;
@@ -102,6 +103,13 @@ public class VenuesInfoController extends AbstractController {
         Map<String, Object> params = requestParams();
         page.setParams(params);
         return venuesInfoService.listPageVenuesInfo(page);
+    }
+
+    @ApiOperation(value = "场馆zTree", notes = "场馆zTree接口")
+    @ApiResponses({@ApiResponse(code = 400, message = "请求失败", response = ErrorResult.class)})
+    @GetMapping("listvenuesinfoztree")
+    public List<ZTreeDTO> listVenuesInfoZTree() throws SearchException {
+        return venuesInfoService.listVenuesInfoZTree();
     }
 
     @ApiOperation(value = "当前用户id信息", notes = "当前用户id信息接口")

@@ -11,10 +11,15 @@
     <link rel="stylesheet" href="assets/layuiadmin/style/admin.css" media="all">
 </head>
 <body>
-<div class="layui-fluid layui-anim layui-anim-fadein">
+<div class="layui-fluid layui-anim layui-anim-fadein" style="padding: 0;">
     <div class="layui-row">
         <div class="layui-col-md12">
             <div class="layui-card">
+                <div class="layui-card-header">
+                    <span class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+                      <a href="javascript:void(0);"><cite id="venueName"></cite></a>
+                    </span>
+                </div>
                 <div class="layui-card-body">
                     <div class="test-table-reload-btn" style="margin-bottom: 10px;">
                         <div class="layui-inline">
@@ -59,16 +64,19 @@
         var laydate = layui.laydate;
         var common = layui.common;
         var resizeTimeout = null;
-        var tableUrl = 'api/venuesproject/listpagevenuesprojectlocal';
+        var tableUrl = 'api/venuesproject/listpagevenuesprojectlocal?venuesInfoId={venuesInfoId}';
+        var venuesInfoId = top.restAjax.params(window.location.href).venuesInfoId;
+        var venueName = top.restAjax.params(window.location.href).venueName;
+        $('#venueName').text(venueName);
 
         // 初始化表格
         function initTable() {
             table.render({
                 elem: '#dataTable',
                 id: 'dataTable',
-                url: top.restAjax.path(tableUrl, []),
+                url: top.restAjax.path(tableUrl, [venuesInfoId]),
                 width: admin.screen() > 1 ? '100%' : '',
-                height: $win.height() - 90,
+                height: $win.height() - 105,
                 limit: 20,
                 limits: [20, 40, 60, 80, 100, 200],
                 toolbar: '#headerToolBar',
@@ -144,6 +152,10 @@
             var checkStatus = table.checkStatus('dataTable');
             var checkDatas = checkStatus.data;
             if(layEvent === 'saveEvent') {
+                if(venuesInfoId == ''){
+                    layer.msg('请先选择场馆');
+                    return;
+                }
                 layer.open({
                     type: 2,
                     title: false,
@@ -151,7 +163,8 @@
                     area: ['100%', '100%'],
                     shadeClose: true,
                     anim: 2,
-                    content: top.restAjax.path('route/venuesproject/save-venuesproject.html', []),
+                    content: top.restAjax.path('route/venuesproject/save-venuesproject.html?venuesInfoId={venuesInfoId}',
+                        [venuesInfoId]),
                     end: function() {
                         reloadTable();
                     }
@@ -169,7 +182,8 @@
                         area: ['100%', '100%'],
                         shadeClose: true,
                         anim: 2,
-                        content: top.restAjax.path('route/venuesproject/update-venuesproject.html?venuesProjectId={venuesProjectId}', [checkDatas[0].venuesProjectId]),
+                        content: top.restAjax.path('route/venuesproject/update-venuesproject.html?venuesProjectId={venuesProjectId}',
+                            [checkDatas[0].venuesProjectId]),
                         end: function() {
                             reloadTable();
                         }
@@ -201,8 +215,8 @@
                     area: ['100%', '100%'],
                     shadeClose: true,
                     anim: 2,
-                    content: top.restAjax.path('route/venuesproject/list-groundinfo.html?venuesInfoId={venueId}&venuesProjectId={venuesProjectId}',
-                        [obj.data.venueId, obj.data.venuesProjectId]),
+                    content: top.restAjax.path('route/venuesproject/list-groundinfo.html?venuesInfoId={venueId}&venuesProjectId={venuesProjectId}&projectName={projectCategoryName}',
+                        [obj.data.venueId, obj.data.venuesProjectId,obj.data.projectCategoryName]),
                     end: function() {
                         reloadTable();
                     }
@@ -236,11 +250,9 @@
         // 重载表格
         function reloadTable(currentPage) {
             table.reload('dataTable', {
-                url: top.restAjax.path(tableUrl, []),
+                url: top.restAjax.path(tableUrl, [venuesInfoId]),
                 where: {
-                    keywords: $('#keywords').val(),
-                    startTime: $('#startTime').val(),
-                    endTime: $('#endTime').val()
+                    keywords: $('#keywords').val()
                 },
                 page: {
                     curr: currentPage

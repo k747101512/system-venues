@@ -56,7 +56,7 @@ mybatis:
 swagger:
   title: 接口文档
   description: 场馆预订系统接口文档
-  service-url: https://baidu.com/
+  service-url: https://192.168.0.109/
   version: 1.0
   swagger-base-package: com.cm
 
@@ -72,7 +72,7 @@ file:
 # 安全
 security:
   oauth2:
-    oauth-server: http://39.104.124.118:7001/usercenter
+    oauth-server: http://192.168.0.109:7001/usercenter
     #oauth-server: https://www.wgink.ink/usercenter
     oauth-logout: ${security.oauth2.oauth-server}/logout?redirect_uri=${server.url}
     client:
@@ -130,7 +130,7 @@ open-platform:
     mini-app:
       active: true
       authorizeUrl: https://api.weixin.qq.com/sns/jscode2session
-      bindUserUrl: http://39.104.124.118:7001/usercenter/wxminiapp/sign/login
+      bindUserUrl: http://192.168.0.109:7001/usercenter/wxminiapp/sign/login
       #bindUserUrl: https://www.wgink.ink/usercenter/wxminiapp/sign/login
       grantType: authorization_code
       appKey: wx57052635beaab3fa

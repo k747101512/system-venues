@@ -11,10 +11,15 @@
     <link rel="stylesheet" href="assets/layuiadmin/style/admin.css" media="all">
 </head>
 <body>
-<div class="layui-fluid layui-anim layui-anim-fadein">
+<div class="layui-fluid layui-anim layui-anim-fadein" style="padding: 0;">
     <div class="layui-row">
         <div class="layui-col-md12">
             <div class="layui-card">
+                <div class="layui-card-header">
+                    <span class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+                      <a href="javascript:void(0);"><cite id="categoryName"></cite></a>
+                    </span>
+                </div>
                 <div class="layui-card-body">
                     <div class="test-table-reload-btn" style="margin-bottom: 10px;">
                         <div class="layui-inline">
@@ -65,16 +70,18 @@
         var laydate = layui.laydate;
         var common = layui.common;
         var resizeTimeout = null;
-        var tableUrl = 'api/articlecontent/listpagearticlecontent';
-
+        var tableUrl = 'api/articlecontent/listpagearticlecontent?articleCategoryId={articleCategoryId}';
+        var articleCategoryId = top.restAjax.params(window.location.href).articleCategoryId;
+        var categoryName = top.restAjax.params(window.location.href).categoryName;
+        $('#categoryName').text(categoryName);
         // 初始化表格
         function initTable() {
             table.render({
                 elem: '#dataTable',
                 id: 'dataTable',
-                url: top.restAjax.path(tableUrl, []),
+                url: top.restAjax.path(tableUrl, [articleCategoryId == '0' ? "" : articleCategoryId]),
                 width: admin.screen() > 1 ? '100%' : '',
-                height: $win.height() - 90,
+                height: $win.height() - 105,
                 limit: 20,
                 limits: [20, 40, 60, 80, 100, 200],
                 toolbar: '#headerToolBar',
@@ -95,7 +102,7 @@
                                 return rowData;
                             }
                         },
-                        {field: 'summaryJoinByArticleCategoryId', width: 200, title: '文章类别', align:'center',
+                        {field: 'titleJoinByArticleCategoryId', width: 200, title: '文章类别', align:'center',
                             templet: function(row) {
                                 var rowData = row[this.field];
                                 if(typeof(rowData) === 'undefined' || rowData == null || rowData == '') {
@@ -138,14 +145,15 @@
                 }
             });
         }
+
         // 重载表格
         function reloadTable(currentPage) {
             table.reload('dataTable', {
-                url: top.restAjax.path(tableUrl, []),
+                url: top.restAjax.path(tableUrl, [articleCategoryId == '0' ? '' : articleCategoryId]),
                 where: {
                     keywords: $('#keywords').val(),
                     startTime: $('#startTime').val(),
-                    endTime: $('#endTime').val()
+                    endTime: $('#endTime').val(),
                 },
                 page: {
                     curr: currentPage
@@ -206,6 +214,10 @@
             var checkStatus = table.checkStatus('dataTable');
             var checkDatas = checkStatus.data;
             if(layEvent === 'saveEvent') {
+                if(typeof(articleCategoryId) === 'undefined' || articleCategoryId == '0'){
+                    top.dialog.msg("请先选择类别");
+                    return;
+                }
                 layer.open({
                     type: 2,
                     title: false,
@@ -213,7 +225,8 @@
                     area: ['100%', '100%'],
                     shadeClose: true,
                     anim: 2,
-                    content: top.restAjax.path('route/venuearticle/save.html', []),
+                    content: top.restAjax.path('route/venuearticle/save.html?articleCategoryId={articleCategoryId}',
+                        [articleCategoryId == '0' ? '' : articleCategoryId]),
                     end: function() {
                         reloadTable();
                     }
