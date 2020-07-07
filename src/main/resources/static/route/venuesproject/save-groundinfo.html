@@ -20,7 +20,7 @@
         </div>
         <div class="layui-card-body" style="padding: 15px;">
             <form class="layui-form layui-form-pane" lay-filter="dataForm">
-                <div class="layui-form-item">
+                <div class="layui-form-item layui-col-md6">
                     <label class="layui-form-label">场地名称</label>
                     <div class="layui-input-block">
                         <input type="text" id="groundName" name="groundName" class="layui-input" value="" placeholder="场地名称" lay-verify="required">
@@ -30,7 +30,7 @@
                     <a class="layui-btn layui-btn-sm add-item"><i class="layui-icon"></i> + 添加场次</a>
                 </div>
                 <!--模板容器-->
-                <div id="itemTemplateBox" lay-filter="itemTemplateBox"></div>
+                <div id="itemTemplateBox" class="layui-col-md12" lay-filter="itemTemplateBox"></div>
                 <!--模板-->
                 <script id="itemTemplate" type="text/html">
                     {{# layui.each(d, function(i,item) { }}

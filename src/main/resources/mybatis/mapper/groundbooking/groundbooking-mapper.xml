@@ -64,7 +64,8 @@
             t1.price,
             t1.gmt_create,
             t2.nick_name,
-            t2.user_id
+            t2.user_id,
+            t2.serial
         FROM
             gen_booking_item t1
         LEFT JOIN gen_booking_info t2 ON t2.ground_booking_id = t1.booking_info_id
@@ -131,7 +132,8 @@
             t1.price,
             t1.gmt_create,
             t2.nick_name,
-            t2.user_id
+            t2.user_id,
+            t2.serial
         FROM
             gen_booking_item t1
         LEFT JOIN gen_booking_info t2 ON t2.ground_booking_id = t1.booking_info_id

@@ -76,6 +76,12 @@
                 cols: [[
                     {type:'checkbox', fixed: 'left'},
                     {field:'rowNum', width:80, title: '序号', fixed: 'left', align:'center', templet: '<span>{{d.LAY_INDEX}}</span>'},
+                    {field: 'serial', width: 200, title: '流水号', align:'center',
+                        templet: function(row) {
+                            var rowData = row[this.field];
+                            return rowData;
+                        }
+                    },
                     {field: 'bookingBaseInfo', width: 300, title: '预定信息', align:'center',
                         templet: function(row) {
                             var venuesName = row['venuesName'];
